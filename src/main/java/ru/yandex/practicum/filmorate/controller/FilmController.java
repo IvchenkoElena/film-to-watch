@@ -4,7 +4,8 @@ import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 
-import java.time.Instant;
+
+import java.time.LocalDate;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -29,7 +30,7 @@ public class FilmController {
         if (newFilm.getDescription().length() > 200) {
             throw new ValidationException("Максимальная длина описания — 200 символов");
         }
-        if (newFilm.getReleaseDate().isBefore(Instant.ofEpochSecond(1895-12-28))) {
+        if (newFilm.getReleaseDate().isBefore(LocalDate.parse("1895-12-28"))) {
             throw new ValidationException("Дата релиза — не раньше 28 декабря 1895 года");
         }
         if (newFilm.getDuration() <= 0) {
@@ -66,16 +67,15 @@ public class FilmController {
             if (newFilm.getDescription().length() > 200) {
                 throw new ValidationException("Максимальная длина описания — 200 символов");
             }
-            if (newFilm.getReleaseDate().isBefore(Instant.ofEpochSecond(1895-12-28))) {
+            if (newFilm.getReleaseDate().isBefore(LocalDate.parse("1895-12-28"))) {
                 throw new ValidationException("Дата релиза — не раньше 28 декабря 1895 года");
             }
             if (newFilm.getDuration() <= 0) {
                 throw new ValidationException("Продолжительность фильма должна быть положительным числом");
             }
             // если публикация найдена и все условия соблюдены, обновляем её содержимое
-            if (newFilm.getName() != null) {
-                oldFilm.setName(newFilm.getName());
-            }
+            oldFilm.setName(newFilm.getName());
+
             if (newFilm.getDescription() != null) {
                 oldFilm.setDescription(newFilm.getDescription());
             }
