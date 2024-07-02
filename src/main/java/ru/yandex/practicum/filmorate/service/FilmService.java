@@ -17,7 +17,7 @@ import java.util.Map;
 public class FilmService {
     private final Map<Integer, Film> films = new HashMap<>();
 
-    private final static Logger log = LoggerFactory.getLogger(FilmService.class);
+    private static final Logger log = LoggerFactory.getLogger(FilmService.class);
 
     public Collection<Film> findAllFilms() {
         return films.values();

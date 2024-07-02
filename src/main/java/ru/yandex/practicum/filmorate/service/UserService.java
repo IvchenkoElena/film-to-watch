@@ -18,7 +18,7 @@ public class UserService {
 
     private final Map<Integer, User> users = new HashMap<>();
 
-    private final static Logger log = LoggerFactory.getLogger(UserService.class);
+    private static final Logger log = LoggerFactory.getLogger(UserService.class);
 
 
     public Collection<User> findAllUsers() {
