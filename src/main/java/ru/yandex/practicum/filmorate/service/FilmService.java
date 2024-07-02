@@ -9,8 +9,9 @@ import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 
 import java.time.LocalDate;
-import java.util.Collection;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Service
@@ -19,8 +20,8 @@ public class FilmService {
 
     private static final Logger log = LoggerFactory.getLogger(FilmService.class);
 
-    public Collection<Film> findAllFilms() {
-        return films.values();
+    public List<Film> findAllFilms() {
+        return new ArrayList<>(films.values());
     }
 
     public Film createFilm(@RequestBody Film newFilm) {

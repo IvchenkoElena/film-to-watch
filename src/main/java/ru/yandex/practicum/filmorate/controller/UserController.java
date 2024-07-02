@@ -7,7 +7,7 @@ import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.UserService;
 
 
-import java.util.Collection;
+import java.util.List;
 
 @RestController
 @RequestMapping("/users")
@@ -21,7 +21,7 @@ public class UserController {
     }
 
     @GetMapping
-    public Collection<User> findAll() {
+    public List<User> findAll() {
         log.info("Получение списка пользователей");
         return userService.findAllUsers();
     }

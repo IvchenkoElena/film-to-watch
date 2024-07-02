@@ -9,8 +9,9 @@ import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
 
 import java.time.LocalDate;
-import java.util.Collection;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Service
@@ -21,8 +22,8 @@ public class UserService {
     private static final Logger log = LoggerFactory.getLogger(UserService.class);
 
 
-    public Collection<User> findAllUsers() {
-        return users.values();
+    public List<User> findAllUsers() {
+        return new ArrayList<>(users.values());
     }
 
     public User createUser(User newUser) {

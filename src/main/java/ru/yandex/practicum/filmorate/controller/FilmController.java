@@ -7,7 +7,7 @@ import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.service.FilmService;
 
 
-import java.util.Collection;
+import java.util.List;
 
 
 @RestController
@@ -23,7 +23,7 @@ public class FilmController {
     }
 
     @GetMapping
-    public Collection<Film> findAll() {
+    public List<Film> findAll() {
         log.info("Получение списка фильмов");
         return filmService.findAllFilms();
     }
