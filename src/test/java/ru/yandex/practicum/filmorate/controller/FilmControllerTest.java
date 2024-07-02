@@ -30,7 +30,7 @@ class FilmControllerTest {
     }
 
     @Test
-    void findAllOneUser() {
+    void findAllOneFilm() {
 
         Film newFilm = new Film();
         String name = "testName";
@@ -52,7 +52,7 @@ class FilmControllerTest {
     }
 
     @Test
-    void createUser() {
+    void createValidFilm() {
 
         Film newFilm = new Film();
         String name = "testName";
@@ -81,7 +81,7 @@ class FilmControllerTest {
     }
 
     @Test
-    void updateUser() {
+    void updateValidFilm() {
         Film oldFilm = new Film();
         String name = "testName";
         oldFilm.setName(name);
@@ -95,7 +95,6 @@ class FilmControllerTest {
         filmController.create(oldFilm);
 
         int id = oldFilm.getId();
-
 
 
         Film newFilm = new Film();

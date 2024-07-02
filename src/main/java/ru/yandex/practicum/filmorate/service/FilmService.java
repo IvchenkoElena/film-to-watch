@@ -36,7 +36,7 @@ public class FilmService {
             log.error(message);
             throw new ValidationException(message);
         }
-        if (newFilm.getReleaseDate().isBefore(LocalDate.parse("1895-12-28"))) {
+        if (newFilm.getReleaseDate().isBefore(LocalDate.of(1895, 12, 28))) {
             String message = "Дата релиза — не раньше 28 декабря 1895 года";
             log.error(message);
             throw new ValidationException(message);

@@ -52,7 +52,7 @@ class UserControllerTest {
     }
 
     @Test
-    void createUser() {
+    void createValidUser() {
 
         User newUser = new User();
         String login = "testLogin";
@@ -81,7 +81,7 @@ class UserControllerTest {
     }
 
     @Test
-    void updateUser() {
+    void updateValidUser() {
         User oldUser = new User();
         String login = "testLogin";
         oldUser.setLogin(login);
