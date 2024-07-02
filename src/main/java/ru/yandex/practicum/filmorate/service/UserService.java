@@ -1,5 +1,7 @@
 package ru.yandex.practicum.filmorate.service;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestBody;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
@@ -16,6 +18,8 @@ public class UserService {
 
     private final Map<Integer, User> users = new HashMap<>();
 
+    private final static Logger log = LoggerFactory.getLogger(UserService.class);
+
 
     public Collection<User> findAllUsers() {
         return users.values();
@@ -24,16 +28,22 @@ public class UserService {
     public User createUser(User newUser) {
         // проверяем выполнение необходимых условий
         if (newUser.getEmail() == null || newUser.getEmail().isBlank() || !newUser.getEmail().contains("@")) {
-            throw new ValidationException("Электронная почта не может быть пустой и должна содержать символ @");
+            String message = "Электронная почта не может быть пустой и должна содержать символ @";
+            log.error(message);
+            throw new ValidationException(message);
         }
         if (newUser.getLogin() == null || newUser.getLogin().isBlank() || newUser.getLogin().contains(" ")) {
-            throw new ValidationException("Логин не может быть пустым и содержать пробелы");
+            String message = "Логин не может быть пустым и содержать пробелы";
+            log.error(message);
+            throw new ValidationException(message);
         }
         if (newUser.getName() == null) {
             newUser.setName(newUser.getLogin());
         }
         if (newUser.getBirthday().isAfter(LocalDate.now())) {
-            throw new ValidationException("Дата рождения не может быть в будущем.");
+            String message = "Дата рождения не может быть в будущем.";
+            log.error(message);
+            throw new ValidationException(message);
         }
         // формируем дополнительные данные
         newUser.setId(getNextId());
@@ -55,21 +65,29 @@ public class UserService {
     public User updateUser(@RequestBody User newUser) {
         // проверяем необходимые условия
         if (newUser.getId() == null) {
-            throw new ValidationException("Id должен быть указан");
+            String message = "Id должен быть указан";
+            log.error(message);
+            throw new ValidationException(message);
         }
         if (users.containsKey(newUser.getId())) {
             User oldUser = users.get(newUser.getId());
             if (newUser.getEmail() == null || newUser.getEmail().isBlank() || !newUser.getEmail().contains("@")) {
-                throw new ValidationException("Электронная почта не может быть пустой и должна содержать символ @");
+                String message = "Электронная почта не может быть пустой и должна содержать символ @";
+                log.error(message);
+                throw new ValidationException(message);
             }
             if (newUser.getLogin() == null || newUser.getLogin().isBlank() || newUser.getLogin().contains(" ")) {
-                throw new ValidationException("Логин не может быть пустым и содержать пробелы");
+                String message = "Логин не может быть пустым и содержать пробелы";
+                log.error(message);
+                throw new ValidationException(message);
             }
             if (newUser.getName() == null) {
                 newUser.setName(newUser.getLogin());
             }
             if (newUser.getBirthday().isAfter(LocalDate.now())) {
-                throw new ValidationException("Дата рождения не может быть в будущем.");
+                String message = "Дата рождения не может быть в будущем.";
+                log.error(message);
+                throw new ValidationException(message);
             }
             // если публикация найдена и все условия соблюдены, обновляем её содержимое
             if (newUser.getName() != null) {
@@ -86,6 +104,8 @@ public class UserService {
             }
             return oldUser;
         }
-        throw new NotFoundException("Пользователь с id = " + newUser.getId() + " не найден");
+        String message = "Пользователь с id = " + newUser.getId() + " не найден";
+        log.error(message);
+        throw new NotFoundException(message);
     }
 }

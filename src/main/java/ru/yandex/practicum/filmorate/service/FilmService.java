@@ -1,5 +1,7 @@
 package ru.yandex.practicum.filmorate.service;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestBody;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
@@ -15,6 +17,8 @@ import java.util.Map;
 public class FilmService {
     private final Map<Integer, Film> films = new HashMap<>();
 
+    private final static Logger log = LoggerFactory.getLogger(FilmService.class);
+
     public Collection<Film> findAllFilms() {
         return films.values();
     }
@@ -22,16 +26,24 @@ public class FilmService {
     public Film createFilm(@RequestBody Film newFilm) {
         // проверяем выполнение необходимых условий
         if (newFilm.getName() == null || newFilm.getName().isBlank()) {
-            throw new ValidationException("Название не может быть пустым");
+            String message = "Название не может быть пустым";
+            log.error(message);
+            throw new ValidationException(message);
         }
         if (newFilm.getDescription().length() > 200) {
-            throw new ValidationException("Максимальная длина описания — 200 символов");
+            String message = "Максимальная длина описания — 200 символов";
+            log.error(message);
+            throw new ValidationException(message);
         }
         if (newFilm.getReleaseDate().isBefore(LocalDate.parse("1895-12-28"))) {
-            throw new ValidationException("Дата релиза — не раньше 28 декабря 1895 года");
+            String message = "Дата релиза — не раньше 28 декабря 1895 года";
+            log.error(message);
+            throw new ValidationException(message);
         }
         if (newFilm.getDuration() <= 0) {
-            throw new ValidationException("Продолжительность фильма должна быть положительным числом");
+            String message = "Продолжительность фильма должна быть положительным числом";
+            log.error(message);
+            throw new ValidationException(message);
         }
         // формируем дополнительные данные
         newFilm.setId(getNextId());
@@ -39,6 +51,7 @@ public class FilmService {
         films.put(newFilm.getId(), newFilm);
         return newFilm;
     }
+
 
     // вспомогательный метод для генерации идентификатора нового фильма
     private Integer getNextId() {
@@ -53,21 +66,31 @@ public class FilmService {
     public Film updateFilm(@RequestBody Film newFilm) {
         // проверяем необходимые условия
         if (newFilm.getId() == null) {
-            throw new ValidationException("Id должен быть указан");
+            String message = "Id должен быть указан";
+            log.error(message);
+            throw new ValidationException(message);
         }
         if (films.containsKey(newFilm.getId())) {
             Film oldFilm = films.get(newFilm.getId());
             if (newFilm.getName() == null || newFilm.getName().isBlank()) {
-                throw new ValidationException("Название не может быть пустым");
+                String message = "Название не может быть пустым";
+                log.error(message);
+                throw new ValidationException(message);
             }
             if (newFilm.getDescription().length() > 200) {
-                throw new ValidationException("Максимальная длина описания — 200 символов");
+                String message = "Максимальная длина описания — 200 символов";
+                log.error(message);
+                throw new ValidationException(message);
             }
             if (newFilm.getReleaseDate().isBefore(LocalDate.parse("1895-12-28"))) {
-                throw new ValidationException("Дата релиза — не раньше 28 декабря 1895 года");
+                String message = "Дата релиза — не раньше 28 декабря 1895 года";
+                log.error(message);
+                throw new ValidationException(message);
             }
             if (newFilm.getDuration() <= 0) {
-                throw new ValidationException("Продолжительность фильма должна быть положительным числом");
+                String message = "Продолжительность фильма должна быть положительным числом";
+                log.error(message);
+                throw new ValidationException(message);
             }
             // если публикация найдена и все условия соблюдены, обновляем её содержимое
             oldFilm.setName(newFilm.getName());
@@ -83,7 +106,9 @@ public class FilmService {
             }
             return oldFilm;
         }
-        throw new NotFoundException("Пост с id = " + newFilm.getId() + " не найден");
+        String message = "Пост с id = " + newFilm.getId() + " не найден";
+        log.error(message);
+        throw new NotFoundException(message);
     }
 
 }
