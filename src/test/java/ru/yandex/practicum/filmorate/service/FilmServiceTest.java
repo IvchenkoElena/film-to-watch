@@ -44,7 +44,7 @@ class FilmServiceTest {
 
         final List<Film> films = filmService.findAllFilms();
 
-        assertNotNull(films, "Фильмы не возврщаются");
+        assertNotNull(films, "Фильмы не возвращаются");
         assertEquals(1, films.size(), "Неверное количество фильмов");
         assertEquals(newFilm, films.getFirst(), "Фильмы не совпадают");
     }
@@ -246,7 +246,7 @@ class FilmServiceTest {
     }
 
     @Test
-    void updateFilmNoId() {
+    void updateFilmNullId() {
         Film oldFilm = new Film();
         String name = "testName";
         oldFilm.setName(name);
