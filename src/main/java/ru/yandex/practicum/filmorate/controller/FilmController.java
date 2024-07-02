@@ -1,6 +1,7 @@
 package ru.yandex.practicum.filmorate.controller;
 
 import org.springframework.web.bind.annotation.*;
+import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 
@@ -87,7 +88,7 @@ public class FilmController {
             }
             return oldFilm;
         }
-        throw new ValidationException("Пост с id = " + newFilm.getId() + " не найден");
+        throw new NotFoundException("Пост с id = " + newFilm.getId() + " не найден");
     }
 
 
