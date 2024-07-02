@@ -273,6 +273,7 @@ class FilmServiceTest {
 
         assertThrows(ValidationException.class, () -> filmService.updateFilm(newFilm));
     }
+
     @Test
     void updateFilmWrongId() {
         Film oldFilm = new Film();
@@ -413,8 +414,8 @@ class FilmServiceTest {
         Film newFilm = new Film();
         newFilm.setId(id);
 
-        String NewName = "testName";
-        newFilm.setName(NewName);
+        String newName = "testName";
+        newFilm.setName(newName);
         String newDescription = "testDescription";
         newFilm.setDescription(newDescription);
         LocalDate newReleaseDate = LocalDate.of(1785, 5, 17);
@@ -444,8 +445,8 @@ class FilmServiceTest {
         Film newFilm = new Film();
         newFilm.setId(id);
 
-        String NewName = "testName";
-        newFilm.setName(NewName);
+        String newName = "testName";
+        newFilm.setName(newName);
         String newDescription = "testDescription";
         newFilm.setDescription(newDescription);
         LocalDate newReleaseDate = LocalDate.of(1785, 5, 17);
@@ -475,8 +476,8 @@ class FilmServiceTest {
         Film newFilm = new Film();
         newFilm.setId(id);
 
-        String NewName = "testName";
-        newFilm.setName(NewName);
+        String newName = "testName";
+        newFilm.setName(newName);
         String newDescription = "testDescription";
         newFilm.setDescription(newDescription);
         LocalDate newReleaseDate = LocalDate.of(1785, 5, 17);
