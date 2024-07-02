@@ -13,9 +13,10 @@ import java.util.Collection;
 @RestController
 @RequestMapping("/films")
 public class FilmController {
+    private final static Logger log = LoggerFactory.getLogger(FilmController.class);
+
     private final FilmService filmService;
 
-    private final static Logger log = LoggerFactory.getLogger(FilmController.class);
 
     public FilmController(FilmService filmService) {
         this.filmService = filmService;

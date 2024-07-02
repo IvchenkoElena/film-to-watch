@@ -12,9 +12,9 @@ import java.util.Collection;
 @RestController
 @RequestMapping("/users")
 public class UserController {
-    private final UserService userService;
-
     private final static Logger log = LoggerFactory.getLogger(UserController.class);
+
+    private final UserService userService;
 
     public UserController(UserService userService) {
         this.userService = userService;
