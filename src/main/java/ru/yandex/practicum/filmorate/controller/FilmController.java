@@ -1,7 +1,7 @@
 package ru.yandex.practicum.filmorate.controller;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.service.FilmService;
@@ -9,18 +9,12 @@ import ru.yandex.practicum.filmorate.service.FilmService;
 
 import java.util.List;
 
-
+@Slf4j
+@RequiredArgsConstructor
 @RestController
 @RequestMapping("/films")
 public class FilmController {
-    private static final Logger log = LoggerFactory.getLogger(FilmController.class);
-
     private final FilmService filmService;
-
-
-    public FilmController(FilmService filmService) {
-        this.filmService = filmService;
-    }
 
     @GetMapping
     public List<Film> findAll() {
@@ -30,7 +24,7 @@ public class FilmController {
 
     @PostMapping
     public Film create(@RequestBody Film newFilm) {
-        log.info("Создание нового фильма");
+        log.info("Создание нового фильма: {}", newFilm.toString());
         return filmService.createFilm(newFilm);
     }
 
