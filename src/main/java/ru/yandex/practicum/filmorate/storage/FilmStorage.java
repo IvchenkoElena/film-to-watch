@@ -6,14 +6,8 @@ import ru.yandex.practicum.filmorate.model.Film;
 import java.util.List;
 
 public interface FilmStorage {
-
-    public List<Film> getAll();
-
-    public Film save(@RequestBody Film newFilm);
-
-    public Film update(@RequestBody Film newFilm);
-
-    public Film getById(long id);
-
-
+    List<Film> getAll();
+    Film save(@RequestBody Film newFilm);
+    Film getById(int id);
+    Film update(@RequestBody Film newFilm);
 }
