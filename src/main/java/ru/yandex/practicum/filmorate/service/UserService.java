@@ -1,11 +1,13 @@
 package ru.yandex.practicum.filmorate.service;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestBody;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.storage.UserStorage;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -15,32 +17,32 @@ import java.util.Map;
 
 @Slf4j
 @Service
+@RequiredArgsConstructor
 public class UserService {
-
-    private final Map<Integer, User> users = new HashMap<>();
+    private final UserStorage userStorage;
 
     public List<User> findAllUsers() {
-        return new ArrayList<>(users.values());
+        return userStorage.findAll();
     }
 
-    public User createUser(User newUser) {
+    public User createUser(@RequestBody User newUser) {
         // проверяем выполнение необходимых условий
         userValidation(newUser);
-        // формируем дополнительные данные
-        newUser.setId(getNextId());
-        // сохраняем нового пользователя в памяти приложения
-        users.put(newUser.getId(), newUser);
-        return newUser;
+        return userStorage.save(newUser);
     }
 
-    // вспомогательный метод для генерации идентификатора нового пользователя
-    private Integer getNextId() {
-        int currentMaxId = users.keySet()
-                .stream()
-                .mapToInt(id -> id)
-                .max()
-                .orElse(0);
-        return ++currentMaxId;
+    public User updateUser(@RequestBody User newUser) {
+        // ищем пользователя с таким ID
+        User oldUser = userStorage.getById(newUser.getId());
+        if (oldUser == null) {
+            String message = "Пользователь с id = " + newUser.getId() + " не найден";
+            log.error(message);
+            throw new NotFoundException(message);
+        }
+        // проверяем необходимые условия
+        userValidation(newUser);
+        // если публикация найдена и все условия соблюдены, обновляем её содержимое
+        return userStorage.update(newUser);
     }
 
     //метод валидации
@@ -63,26 +65,5 @@ public class UserService {
             log.error(message);
             throw new ValidationException(message);
         }
-    }
-
-    public User updateUser(@RequestBody User newUser) {
-        // ищем пользователя с таким ID
-        User oldUser = users.get(newUser.getId());
-        if (oldUser == null) {
-            String message = "Пользователь с id = " + newUser.getId() + " не найден";
-            log.error(message);
-            throw new NotFoundException(message);
-        }
-
-        // проверяем необходимые условия
-        userValidation(newUser);
-
-        // если публикация найдена и все условия соблюдены, обновляем её содержимое
-        oldUser.setName(newUser.getName());
-        oldUser.setEmail(newUser.getEmail());
-        oldUser.setLogin(newUser.getLogin());
-        oldUser.setBirthday(newUser.getBirthday());
-
-        return oldUser;
     }
 }

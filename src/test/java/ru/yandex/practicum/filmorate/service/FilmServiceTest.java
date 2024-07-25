@@ -5,6 +5,8 @@ import org.junit.jupiter.api.Test;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.storage.FilmStorage;
+import ru.yandex.practicum.filmorate.storage.InMemoryFilmStorage;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -13,12 +15,14 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class FilmServiceTest {
     FilmService filmService;
+    FilmStorage filmStorage;
     Film film;
     int id;
 
     @BeforeEach
     void beforeEach() {
-        filmService = new FilmService();
+        filmStorage = new InMemoryFilmStorage();
+        filmService = new FilmService(filmStorage);
 
         film = new Film();
         String name = "testName";
