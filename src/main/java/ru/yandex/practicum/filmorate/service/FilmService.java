@@ -25,6 +25,16 @@ public class FilmService {
         return filmStorage.getAll();
     }
 
+    public Film findById(Integer filmId) {
+        Film film = filmStorage.getById(filmId);
+        if (film  == null) {
+            String message = "Фильм с id = " + filmId + " не найден";
+            log.error(message);
+            throw new NotFoundException(message);
+        }
+        return film;
+    }
+
     public Film createFilm(@RequestBody Film newFilm) {
         // проверяем выполнение необходимых условий
         filmValidation(newFilm);
@@ -108,7 +118,7 @@ public class FilmService {
         filmStorage.getById(filmId).getLikes().remove(userId);
     }
 
-    public List<Film> bestFilms() {//хотела написать в одну строку, но так и не
+    public List<Film> bestFilms(int count) {//хотела написать в одну строку, но так и не
         // получилось. Это возможно с помощью stream?
 
         List<Film> sortedFilms = filmStorage.getAll().stream()
@@ -116,7 +126,7 @@ public class FilmService {
                 .toList();
 
         return sortedFilms.reversed().stream()
-                .limit(10)
+                .limit(count)
                 .toList();
     }
 }

@@ -21,6 +21,11 @@ public class InMemoryFilmStorage implements FilmStorage {
     }
 
     @Override
+    public Film getById(int id) {
+        return films.get(id);
+    }
+
+    @Override
     public Film save(@RequestBody Film newFilm) {
         // формируем дополнительные данные
         newFilm.setId(getNextId());
@@ -38,11 +43,6 @@ public class InMemoryFilmStorage implements FilmStorage {
         oldFilm.setReleaseDate(newFilm.getReleaseDate());
         oldFilm.setDuration(newFilm.getDuration());
         return oldFilm;
-    }
-
-    @Override
-    public Film getById(int id) {
-        return films.get(id);
     }
 
     // вспомогательный метод для генерации идентификатора нового фильма

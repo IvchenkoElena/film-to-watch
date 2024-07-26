@@ -22,6 +22,16 @@ public class UserService {
         return userStorage.findAll();
     }
 
+    public User findById(Integer userId) {
+        User user = userStorage.getById(userId);
+        if (user == null) {
+            String message = "Пользователь с id = " + userId + " не найден";
+            log.error(message);
+            throw new NotFoundException(message);
+        }
+        return user;
+    }
+
     public User createUser(@RequestBody User newUser) {
         // проверяем выполнение необходимых условий
         userValidation(newUser);
@@ -104,6 +114,18 @@ public class UserService {
         }
         userStorage.getById(firstId).getFriends().remove(secondId);
         userStorage.getById(secondId).getFriends().remove(firstId);
+    }
+
+    public List<User> findFriends(Integer id) {
+        // ищем пользователй с такими ID
+        if (userStorage.getById(id) == null) {
+            String message = "Пользователь с id = " + id + " не найден";
+            log.error(message);
+            throw new NotFoundException(message);
+        }
+        return userStorage.getById(id).getFriends().stream()
+                .map(userStorage::getById)
+                .toList();
     }
 
     public List<User> findMutualFriends(Integer firstId, Integer secondId) {
