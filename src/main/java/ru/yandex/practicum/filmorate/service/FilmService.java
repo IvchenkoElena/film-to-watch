@@ -27,7 +27,7 @@ public class FilmService {
 
     public Film findById(Integer filmId) {
         Film film = filmStorage.getById(filmId);
-        if (film  == null) {
+        if (film == null) {
             String message = "Фильм с id = " + filmId + " не найден";
             log.error(message);
             throw new NotFoundException(message);
@@ -44,7 +44,7 @@ public class FilmService {
 
     public Film updateFilm(@RequestBody Film newFilm) {
         Film oldFilm = filmStorage.getById(newFilm.getId());
-        if (oldFilm  == null) {
+        if (oldFilm == null) {
             String message = "Фильм с id = " + newFilm.getId() + " не найден";
             log.error(message);
             throw new NotFoundException(message);
@@ -118,7 +118,7 @@ public class FilmService {
         filmStorage.getById(filmId).getLikes().remove(userId);
     }
 
-    public List<Film> bestFilms(int count) {//хотела написать в одну строку, но так и не
+    public List<Film> bestFilms(int count) { //хотела написать в одну строку, но так и не
         // получилось. Это возможно с помощью stream?
 
         List<Film> sortedFilms = filmStorage.getAll().stream()

@@ -7,11 +7,10 @@ import java.util.List;
 
 public interface UserStorage {
     List<User> findAll();
+
     User save(@RequestBody User newUser);
-    User getById (int id);
+
+    User getById(int id);
+
     User update(@RequestBody User newUser);
-
-
-
-
 }
