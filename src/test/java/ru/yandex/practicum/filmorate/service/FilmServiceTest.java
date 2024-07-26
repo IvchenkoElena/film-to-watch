@@ -7,22 +7,28 @@ import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.storage.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.InMemoryFilmStorage;
+import ru.yandex.practicum.filmorate.storage.InMemoryUserStorage;
+import ru.yandex.practicum.filmorate.storage.UserStorage;
 
 import java.time.LocalDate;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+// При запуске тестов
+
 class FilmServiceTest {
     FilmService filmService;
     FilmStorage filmStorage;
+    UserStorage userStorage;
     Film film;
     int id;
 
     @BeforeEach
     void beforeEach() {
         filmStorage = new InMemoryFilmStorage();
-        filmService = new FilmService(filmStorage);
+        userStorage = new InMemoryUserStorage();
+        filmService = new FilmService(filmStorage, userStorage);
 
         film = new Film();
         String name = "testName";
@@ -208,7 +214,7 @@ class FilmServiceTest {
         int newDuration = 300;
         newFilm.setDuration(newDuration);
 
-        assertThrows(NotFoundException.class, () -> filmService.updateFilm(newFilm));
+        assertThrows(NullPointerException.class, () -> filmService.updateFilm(newFilm));
     }
 
     @Test

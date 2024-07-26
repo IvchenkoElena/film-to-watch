@@ -8,8 +8,10 @@ import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.storage.FilmStorage;
+import ru.yandex.practicum.filmorate.storage.UserStorage;
 
 import java.time.LocalDate;
+import java.util.Comparator;
 import java.util.List;
 
 @Slf4j
@@ -17,6 +19,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class FilmService {
     private final FilmStorage filmStorage;
+    private final UserStorage userStorage;
 
     public List<Film> findAllFilms() {
         return filmStorage.getAll();
@@ -32,7 +35,7 @@ public class FilmService {
     public Film updateFilm(@RequestBody Film newFilm) {
         Film oldFilm = filmStorage.getById(newFilm.getId());
         if (oldFilm  == null) {
-            String message = "Пост с id = " + newFilm.getId() + " не найден";
+            String message = "Фильм с id = " + newFilm.getId() + " не найден";
             log.error(message);
             throw new NotFoundException(message);
         }
@@ -63,5 +66,57 @@ public class FilmService {
             log.error(message);
             throw new ValidationException(message);
         }
+    }
+
+    public void addLike(Integer filmId, Integer userId) {
+        // ищем пользователй с такими ID
+        if (filmStorage.getById(filmId) == null) {
+            String message = "Фильм с id = " + filmId + " не найден";
+            log.error(message);
+            throw new NotFoundException(message);
+        }
+        if (userStorage.getById(userId) == null) {
+            String message = "Пользователь с id = " + userId + " не найден";
+            log.error(message);
+            throw new NotFoundException(message);
+        }
+        if (filmStorage.getById(filmId).getLikes().contains(userId)) {
+            String message = "Пользователь уже оценил этот фильм ранее";
+            log.error(message);
+            throw new ValidationException(message);
+        }
+        filmStorage.getById(filmId).getLikes().add(userId);
+    }
+
+    public void removeLike(Integer filmId, Integer userId) {
+        // ищем пользователй с такими ID
+        if (filmStorage.getById(filmId) == null) {
+            String message = "Фильм с id = " + filmId + " не найден";
+            log.error(message);
+            throw new NotFoundException(message);
+        }
+        if (userStorage.getById(userId) == null) {
+            String message = "Пользователь с id = " + userId + " не найден";
+            log.error(message);
+            throw new NotFoundException(message);
+        }
+        if (!filmStorage.getById(filmId).getLikes().contains(userId)) {
+            String message = "Пользователь еще не оценил этот фильм";
+            log.error(message);
+            throw new ValidationException(message);
+        }
+        filmStorage.getById(filmId).getLikes().remove(userId);
+    }
+
+    public List<Film> bestFilms() {//хотела написать в одну строку, но так и не
+        // получилось. Это возможно с помощью stream?
+
+        List<Film> sortedFilms = filmStorage.getAll().stream()
+                .sorted(Comparator.comparingInt(f -> f.getLikes().size()))
+                .toList();
+
+        return sortedFilms.reversed().stream()
+                .limit(10)
+                .toList();
     }
 }
