@@ -26,16 +26,10 @@ public class FilmService {
     }
 
     public Film findById(Integer filmId) {
-        Film film = filmStorage.getById(filmId);
-        if (film == null) {
-            String message = "Фильм с id = " + filmId + " не найден";
-            log.error(message);
-            throw new NotFoundException(message);
-        }
-        return film;
+        return filmStorage.getById(filmId);
     }
 
-    public Film createFilm(@RequestBody Film newFilm) {
+    public Film createFilm(@RequestBody Film newFilm) {  //тут в сервисах тоже надо убрать аннотацию request body?
         // проверяем выполнение необходимых условий
         filmValidation(newFilm);
         // сохраняем новый фильм в памяти приложения
@@ -43,13 +37,6 @@ public class FilmService {
     }
 
     public Film updateFilm(@RequestBody Film newFilm) {
-        Film oldFilm = filmStorage.getById(newFilm.getId());
-        if (oldFilm == null) {
-            String message = "Фильм с id = " + newFilm.getId() + " не найден";
-            log.error(message);
-            throw new NotFoundException(message);
-        }
-        // проверяем необходимые условия
         filmValidation(newFilm);
         return filmStorage.update(newFilm);
     }
@@ -118,8 +105,23 @@ public class FilmService {
         filmStorage.getById(filmId).getLikes().remove(userId);
     }
 
-    public List<Film> bestFilms(int count) { //хотела написать в одну строку, но так и не
+    public List<Film> bestFilms(int count) { // Хотела написать в одну строку, но так и не
         // получилось. Это возможно с помощью stream?
+
+//        return filmStorage.getAll().stream()
+//                        .sorted(Comparator.comparingInt(f -> f.getLikes().size()).reversed())
+//                        .limit(count)
+//                        .toList();
+
+//          return filmStorage.getAll().stream()
+//                          .sorted(Comparator.comparingInt((Film::getLikes).size()).reversed())
+//                          .limit(count)
+//                          .toList();
+
+        // не получается никак в одну строку, не работает ни так, ни так.
+        // В первом варианте getLikes красным цветом: Cannot resolve method 'getLikes' in 'Object'
+        // А во втором варианте Film::getLikes подчеркнуто красным: Method reference expression is not expected here
+
 
         List<Film> sortedFilms = filmStorage.getAll().stream()
                 .sorted(Comparator.comparingInt(f -> f.getLikes().size()))

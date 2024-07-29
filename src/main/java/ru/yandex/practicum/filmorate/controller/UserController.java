@@ -34,7 +34,7 @@ public class UserController {
         return userService.findFriends(id);
     }
 
-    @GetMapping("/{id}/friends/{friendId}")
+    @GetMapping("/{id}/friends/common/{friendId}")
     public List<User> findMutualFriends(@PathVariable Integer id,
                                         @PathVariable Integer friendId) {
         log.info("Получение списка общих друзей пользователей с ID {}, {}", id, friendId);
@@ -54,18 +54,16 @@ public class UserController {
     }
 
     @PutMapping("/{id}/friends/{friendId}")
-    public String addToFriends(@PathVariable Integer id,
-                               @PathVariable Integer friendId) {
-        log.info("Пользователи с ID {} и {} добавлены в друзья", id, friendId);
+    public void addToFriends(@PathVariable Integer id,
+                             @PathVariable Integer friendId) {
         userService.addToFriends(id, friendId);
-        return "Пользователи с ID " + id + " и " + friendId + " теперь друзья";
+        log.info("Пользователи с ID {} и {} добавлены в друзья", id, friendId);
     }
 
     @DeleteMapping("/{id}/friends/{friendId}")
-    public String removeFromFriends(@PathVariable Integer id,
-                                    @PathVariable Integer friendId) {
-        log.info("Пользователи с ID {} и {} удалены из друзей", id, friendId);
+    public void removeFromFriends(@PathVariable Integer id,
+                                  @PathVariable Integer friendId) {
         userService.removeFromFriends(id, friendId);
-        return "Пользователи с ID " + id + " и " + friendId + " больше не дружат";
+        log.info("Пользователи с ID {} и {} удалены из друзей", id, friendId);
     }
 }

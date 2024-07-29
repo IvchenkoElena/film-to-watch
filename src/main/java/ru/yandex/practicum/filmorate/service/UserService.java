@@ -4,7 +4,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestBody;
-import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.UserStorage;
@@ -23,13 +22,8 @@ public class UserService {
     }
 
     public User findById(Integer userId) {
-        User user = userStorage.getById(userId);
-        if (user == null) {
-            String message = "Пользователь с id = " + userId + " не найден";
-            log.error(message);
-            throw new NotFoundException(message);
-        }
-        return user;
+
+        return userStorage.getById(userId);
     }
 
     public User createUser(@RequestBody User newUser) {
@@ -39,14 +33,6 @@ public class UserService {
     }
 
     public User updateUser(@RequestBody User newUser) {
-        // ищем пользователя с таким ID
-        User oldUser = userStorage.getById(newUser.getId());
-        if (oldUser == null) {
-            String message = "Пользователь с id = " + newUser.getId() + " не найден";
-            log.error(message);
-            throw new NotFoundException(message);
-        }
-        // проверяем необходимые условия
         userValidation(newUser);
         // если публикация найдена и все условия соблюдены, обновляем её содержимое
         return userStorage.update(newUser);
@@ -75,17 +61,6 @@ public class UserService {
     }
 
     public void addToFriends(Integer firstId, Integer secondId) {
-        // ищем пользователй с такими ID
-        if (userStorage.getById(firstId) == null) {
-            String message = "Пользователь с id = " + firstId + " не найден";
-            log.error(message);
-            throw new NotFoundException(message);
-        }
-        if (userStorage.getById(secondId) == null) {
-            String message = "Пользователь с id = " + secondId + " не найден";
-            log.error(message);
-            throw new NotFoundException(message);
-        }
         if (userStorage.getById(firstId).getFriends().contains(secondId)) {
             String message = "Пользователи уже дружат";
             log.error(message);
@@ -96,50 +71,25 @@ public class UserService {
     }
 
     public void removeFromFriends(Integer firstId, Integer secondId) {
-        // ищем пользователй с такими ID
-        if (userStorage.getById(firstId) == null) {
-            String message = "Пользователь с id = " + firstId + " не найден";
-            log.error(message);
-            throw new NotFoundException(message);
-        }
-        if (userStorage.getById(secondId) == null) {
-            String message = "Пользователь с id = " + secondId + " не найден";
-            log.error(message);
-            throw new NotFoundException(message);
-        }
-        if (!userStorage.getById(firstId).getFriends().contains(secondId)) {
-            String message = "Пользователи не были друзьями";
-            log.error(message);
-            throw new ValidationException(message);
-        }
+
+//        if (!userStorage.getById(firstId).getFriends().contains(secondId)) {
+//            String message = "Пользователи не были друзьями";
+//            log.error(message);
+//            throw new ValidationException(message);
+//        }
+        // С этой проверкой падали тесты, убрать ее, получается?
+
         userStorage.getById(firstId).getFriends().remove(secondId);
         userStorage.getById(secondId).getFriends().remove(firstId);
     }
 
     public List<User> findFriends(Integer id) {
-        // ищем пользователй с такими ID
-        if (userStorage.getById(id) == null) {
-            String message = "Пользователь с id = " + id + " не найден";
-            log.error(message);
-            throw new NotFoundException(message);
-        }
         return userStorage.getById(id).getFriends().stream()
                 .map(userStorage::getById)
                 .toList();
     }
 
     public List<User> findMutualFriends(Integer firstId, Integer secondId) {
-        // ищем пользователй с такими ID
-        if (userStorage.getById(firstId) == null) {
-            String message = "Пользователь с id = " + firstId + " не найден";
-            log.error(message);
-            throw new NotFoundException(message);
-        }
-        if (userStorage.getById(secondId) == null) {
-            String message = "Пользователь с id = " + secondId + " не найден";
-            log.error(message);
-            throw new NotFoundException(message);
-        }
         return userStorage.getById(firstId).getFriends().stream()
                 .filter(id -> userStorage.getById(secondId).getFriends().contains(id))
                 .map(userStorage::getById)

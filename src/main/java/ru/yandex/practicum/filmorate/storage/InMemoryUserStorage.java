@@ -1,8 +1,9 @@
 package ru.yandex.practicum.filmorate.storage;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-import org.springframework.web.bind.annotation.RequestBody;
+import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
 
 import java.util.ArrayList;
@@ -10,6 +11,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class InMemoryUserStorage implements UserStorage {
@@ -21,7 +23,7 @@ public class InMemoryUserStorage implements UserStorage {
     }
 
     @Override
-    public User save(@RequestBody User newUser) {
+    public User save(User newUser) {
         // формируем дополнительные данные
         newUser.setId(getNextId());
         // сохраняем нового пользователя в памяти приложения
@@ -31,11 +33,22 @@ public class InMemoryUserStorage implements UserStorage {
 
     @Override
     public User getById(int id) {
-        return users.get(id);
+        User user = users.get(id);
+        if (user == null) {
+            String message = "Пользователь с id = " + id + " не найден";
+            log.error(message);
+            throw new NotFoundException(message);
+        }
+        return user;
     }
 
-    public User update(@RequestBody User newUser) {
+    public User update(User newUser) {
         User oldUser = users.get(newUser.getId());
+        if (oldUser == null) {
+            String message = "Пользователь с id = " + newUser.getId() + " не найден";
+            log.error(message);
+            throw new NotFoundException(message);
+        }
         // если публикация найдена и все условия соблюдены, обновляем её содержимое
         oldUser.setName(newUser.getName());
         oldUser.setEmail(newUser.getEmail());
