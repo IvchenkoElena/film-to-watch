@@ -241,7 +241,7 @@ class UserServiceTest {
         LocalDate newBirthday = LocalDate.of(1975, 5, 17);
         newUser.setBirthday(newBirthday);
 
-        assertThrows(NullPointerException.class, () -> userService.updateUser(newUser));
+        assertThrows(NotFoundException.class, () -> userService.updateUser(newUser));
     }
 
     @Test

@@ -214,7 +214,7 @@ class FilmServiceTest {
         int newDuration = 300;
         newFilm.setDuration(newDuration);
 
-        assertThrows(NullPointerException.class, () -> filmService.updateFilm(newFilm));
+        assertThrows(NotFoundException.class, () -> filmService.updateFilm(newFilm));
     }
 
     @Test
