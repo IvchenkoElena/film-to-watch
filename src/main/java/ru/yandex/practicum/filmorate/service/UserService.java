@@ -3,7 +3,6 @@ package ru.yandex.practicum.filmorate.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.RequestBody;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.UserStorage;
@@ -26,13 +25,13 @@ public class UserService {
         return userStorage.getById(userId);
     }
 
-    public User createUser(@RequestBody User newUser) {
+    public User createUser(User newUser) {
         // проверяем выполнение необходимых условий
         userValidation(newUser);
         return userStorage.save(newUser);
     }
 
-    public User updateUser(@RequestBody User newUser) {
+    public User updateUser(User newUser) {
         userValidation(newUser);
         // если публикация найдена и все условия соблюдены, обновляем её содержимое
         return userStorage.update(newUser);
@@ -71,13 +70,6 @@ public class UserService {
     }
 
     public void removeFromFriends(Integer firstId, Integer secondId) {
-
-//        if (!userStorage.getById(firstId).getFriends().contains(secondId)) {
-//            String message = "Пользователи не были друзьями";
-//            log.error(message);
-//            throw new ValidationException(message);
-//        }
-        // С этой проверкой падали тесты, убрать ее, получается?
 
         userStorage.getById(firstId).getFriends().remove(secondId);
         userStorage.getById(secondId).getFriends().remove(firstId);

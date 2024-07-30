@@ -3,7 +3,6 @@ package ru.yandex.practicum.filmorate.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.RequestBody;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
@@ -29,14 +28,14 @@ public class FilmService {
         return filmStorage.getById(filmId);
     }
 
-    public Film createFilm(@RequestBody Film newFilm) {  //тут в сервисах тоже надо убрать аннотацию request body?
+    public Film createFilm(Film newFilm) {
         // проверяем выполнение необходимых условий
         filmValidation(newFilm);
         // сохраняем новый фильм в памяти приложения
         return filmStorage.save(newFilm);
     }
 
-    public Film updateFilm(@RequestBody Film newFilm) {
+    public Film updateFilm(Film newFilm) {
         filmValidation(newFilm);
         return filmStorage.update(newFilm);
     }
@@ -105,29 +104,9 @@ public class FilmService {
         filmStorage.getById(filmId).getLikes().remove(userId);
     }
 
-    public List<Film> bestFilms(int count) { // Хотела написать в одну строку, но так и не
-        // получилось. Это возможно с помощью stream?
-
-//        return filmStorage.getAll().stream()
-//                        .sorted(Comparator.comparingInt(f -> f.getLikes().size()).reversed())
-//                        .limit(count)
-//                        .toList();
-
-//          return filmStorage.getAll().stream()
-//                          .sorted(Comparator.comparingInt((Film::getLikes).size()).reversed())
-//                          .limit(count)
-//                          .toList();
-
-        // не получается никак в одну строку, не работает ни так, ни так.
-        // В первом варианте getLikes красным цветом: Cannot resolve method 'getLikes' in 'Object'
-        // А во втором варианте Film::getLikes подчеркнуто красным: Method reference expression is not expected here
-
-
-        List<Film> sortedFilms = filmStorage.getAll().stream()
-                .sorted(Comparator.comparingInt(f -> f.getLikes().size()))
-                .toList();
-
-        return sortedFilms.reversed().stream()
+    public List<Film> bestFilms(int count) {
+        return filmStorage.getAll().stream()
+                .sorted(Comparator.comparingInt(Film::getLikesCount).reversed())
                 .limit(count)
                 .toList();
     }

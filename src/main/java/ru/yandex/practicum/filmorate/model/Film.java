@@ -14,6 +14,9 @@ public class Film {
     private String description;
     private LocalDate releaseDate;
     private Integer duration;
-    private final Set<Integer> likes = new HashSet<>(); // по совету одногруппников добавила тут final, чтобы сразу создавался пустой список.
-    // Но не до конца понимаю, почему именно так работает, а пока не было final, мог возвращаться null
+    private final Set<Integer> likes = new HashSet<>();
+
+    public int getLikesCount() {
+        return likes.size();
+    }
 }
