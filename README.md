@@ -22,7 +22,7 @@ Genre - названия жанров
 ## Примеры SQL запросов
 
 
-#### Найти пользоваителя по идентификатору: findUser(Long userId)
+#### Найти пользователя по идентификатору: findUser(Long userId)
 ```sql
 SELECT *
 FROM User
