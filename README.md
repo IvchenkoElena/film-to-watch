@@ -46,6 +46,6 @@ WHERE id = {user.getId()};
 
 #### Удалить пользователя по идентификатору: deleteUser (Long userId)
 ```sql
-DELETE FROM user
+DELETE FROM User
 WHERE user_id = {userId};
 ```
