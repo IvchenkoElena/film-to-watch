@@ -26,7 +26,7 @@ Genre - названия жанров
 ```sql
 SELECT *
 FROM User
-WHERE id = {userId};
+WHERE user_id = {userId};
 ```
 #### Добавить нового пользователя: create(User user)
 ```sql
@@ -41,7 +41,7 @@ SET email = {user.getEmail()},
     login = {user.getLogin()}, 
     name = {user.getName()}, 
     birthday = {user.getBirthday()}
-WHERE id = {user.getId()};
+WHERE user_id = {user.getId()};
 ```
 
 #### Удалить пользователя по идентификатору: deleteUser (Long userId)
