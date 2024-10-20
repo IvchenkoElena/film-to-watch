@@ -1,4 +1,4 @@
-# java-filmorate
+# [![Typing SVG](https://readme-typing-svg.demolab.com?font=Fira+Code&weight=600&size=36&pause=10000&color=36A2F7&width=435&height=56&lines=JAVA - FILMORATE)](https://git.io/typing-svg)
 Template repository for Filmorate project.
 
 ## Схема базы данных 
