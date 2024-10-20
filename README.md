@@ -2,7 +2,7 @@
 Template repository for Filmorate project.
 
 ## Схема базы данных 
-![Схема базы данных](https://github.com/IvchenkoElena/java-filmorate/blob/main/src/main/resources/Filmorate%20(2).png)
+![Схема базы данных](https://github.com/IvchenkoElena/java-filmorate/blob/main/src/main/resources/Filmorate%20(3).png)
 
 ## Описание
 User - информация о пользователях
