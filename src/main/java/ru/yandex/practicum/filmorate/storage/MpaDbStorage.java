@@ -27,7 +27,7 @@ public class MpaDbStorage extends BaseRepository<Mpa> implements MpaStorage {
         return findMany(FIND_ALL_QUERY);
     }
 
-    public Mpa getById(int id){
+    public Mpa getById(int id) {
         return findOne(FIND_BY_ID_QUERY, id)
                 .orElseThrow(() -> new NotFoundException(String.format("Рейтинг c ID %d не найден", id)));
     }

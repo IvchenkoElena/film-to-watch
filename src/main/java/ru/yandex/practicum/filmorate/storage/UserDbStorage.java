@@ -40,13 +40,13 @@ public class UserDbStorage extends BaseRepository<User> implements UserStorage {
     }
 
     @Override
-    public User getById(int id){
+    public User getById(int id) {
         return findOne(FIND_BY_ID_QUERY, id)
                 .orElseThrow(() -> new NotFoundException(String.format("Пользователь c ID %d не найден", id)));
     }
 
     @Override
-    public User update(@RequestBody User newUser){
+    public User update(@RequestBody User newUser) {
         update(
                 UPDATE_QUERY,
                 newUser.getEmail(),
@@ -65,7 +65,7 @@ public class UserDbStorage extends BaseRepository<User> implements UserStorage {
     }
 
     @Override
-    public User save(User newUser){
+    public User save(User newUser) {
         Integer id = insert(
                 INSERT_QUERY,
                 newUser.getEmail(),

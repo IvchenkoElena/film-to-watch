@@ -28,7 +28,7 @@ public class GenreDbStorage extends BaseRepository<Genre> implements GenreStorag
         return findMany(FIND_ALL_QUERY);
     }
 
-    public Genre getById(int id){
+    public Genre getById(int id) {
         return findOne(FIND_BY_ID_QUERY, id)
                 .orElseThrow(() -> new NotFoundException(String.format("Жанр c ID %d не найден", id)));
     }
