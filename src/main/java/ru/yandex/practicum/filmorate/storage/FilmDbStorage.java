@@ -63,7 +63,7 @@ public class FilmDbStorage extends BaseRepository<Film> implements FilmStorage {
                 newFilm.getMpa().getId(),
                 newFilm.getId()
         );
-        List<Genre> genres = newFilm.getGenres();
+        Set<Genre> genres = newFilm.getGenres();
         if (genres != null) {
             for (Genre genre : genres) {
                 update(INSERT_FILM_GENRE_QUERY, newFilm.getId(), genre.getId());
@@ -89,7 +89,7 @@ public class FilmDbStorage extends BaseRepository<Film> implements FilmStorage {
                 newFilm.getMpa().getId()
         );
         newFilm.setId(id);
-        List<Genre> genres = newFilm.getGenres();
+        Set<Genre> genres = newFilm.getGenres();
         if (genres != null) {
             for (Genre genre : genres) {
                 update(INSERT_FILM_GENRE_QUERY, id, genre.getId());

@@ -16,6 +16,8 @@ import ru.yandex.practicum.filmorate.storage.UserStorage;
 import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -45,7 +47,7 @@ public class FilmService {
             }
             List<Genre> genres = genreStorage.getGenresByFilmId(filmId);
             if (genres != null) {
-                List<Genre> notDuplicateGenres = genres.stream().distinct().toList();
+                Set<Genre> notDuplicateGenres = new HashSet<>(genres);
                 film.setGenres(notDuplicateGenres);
             }
         }
@@ -57,7 +59,7 @@ public class FilmService {
         Mpa mpa = mpaStorage.findByFilmId(filmId);
         film.setMpa(mpa);
         List<Genre> genres = genreStorage.getGenresByFilmId(filmId);
-        List<Genre> notDuplicateGenres = genres.stream().distinct().toList();
+        Set<Genre> notDuplicateGenres = new HashSet<>(genres);
         film.setGenres(notDuplicateGenres);
         return film;
     }
@@ -156,7 +158,8 @@ public class FilmService {
             Mpa mpa = mpaStorage.findByFilmId(filmId);
             film.setMpa(mpa);
             List<Genre> genres = genreStorage.getGenresByFilmId(filmId);
-            film.setGenres(genres);
+            Set<Genre> notDuplicateGenres = new HashSet<>(genres);
+            film.setGenres(notDuplicateGenres);
         }
         return films;
     }
