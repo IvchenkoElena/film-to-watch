@@ -19,7 +19,7 @@ import java.util.Set;
 public class FilmDbStorage extends BaseRepository<Film> implements FilmStorage {
 
     private static final String FIND_ALL_QUERY = "SELECT * FROM films";
-//    private static final String FIND_BY_ID_QUERY = "SELECT * FROM FILMS f JOIN RATING r ON f.RATING_ID = r.RATING_ID WHERE f.FILM_ID = ?";
+    //    private static final String FIND_BY_ID_QUERY = "SELECT * FROM FILMS f JOIN RATING r ON f.RATING_ID = r.RATING_ID WHERE f.FILM_ID = ?";
     private static final String FIND_BY_ID_QUERY = "SELECT * FROM films WHERE film_id = ?";
     private static final String UPDATE_QUERY = "UPDATE FILMS SET NAME = ?, DESCRIPTION = ?, RELEASE_DATE = ?, DURATION = ?, RATING_ID = ?" +
             "WHERE FILM_ID = ?";
@@ -47,13 +47,13 @@ public class FilmDbStorage extends BaseRepository<Film> implements FilmStorage {
     }
 
     @Override
-    public Film getById(int id){
+    public Film getById(int id) {
         return findOne(FIND_BY_ID_QUERY, id)
                 .orElseThrow(() -> new NotFoundException(String.format("Фильм c ID %d не найден", id)));
     }
 
     @Override
-    public Film update(@RequestBody Film newFilm){
+    public Film update(@RequestBody Film newFilm) {
         update(
                 UPDATE_QUERY,
                 newFilm.getName(),
@@ -79,7 +79,7 @@ public class FilmDbStorage extends BaseRepository<Film> implements FilmStorage {
     }
 
     @Override
-    public Film save(@RequestBody Film newFilm){
+    public Film save(@RequestBody Film newFilm) {
         Integer id = insert(
                 INSERT_QUERY,
                 newFilm.getName(),
