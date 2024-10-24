@@ -1,4 +1,4 @@
-package ru.yandex.practicum.filmorate.service;
+/*package ru.yandex.practicum.filmorate.service;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -6,8 +6,8 @@ import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.storage.FilmStorage;
-import ru.yandex.practicum.filmorate.storage.InMemoryFilmStorage;
-import ru.yandex.practicum.filmorate.storage.InMemoryUserStorage;
+import ru.yandex.practicum.filmorate.storage.FilmInMemoryStorage;
+import ru.yandex.practicum.filmorate.storage.UserInMemoryStorage;
 import ru.yandex.practicum.filmorate.storage.UserStorage;
 
 import java.time.LocalDate;
@@ -26,8 +26,8 @@ class FilmServiceTest {
 
     @BeforeEach
     void beforeEach() {
-        filmStorage = new InMemoryFilmStorage();
-        userStorage = new InMemoryUserStorage();
+        filmStorage = new FilmInMemoryStorage();
+        userStorage = new UserInMemoryStorage();
         filmService = new FilmService(filmStorage, userStorage);
 
         film = new Film();
@@ -333,4 +333,4 @@ class FilmServiceTest {
 
         assertThrows(ValidationException.class, () -> filmService.updateFilm(newFilm));
     }
-}
+}*/

@@ -12,9 +12,9 @@ import java.util.List;
 import java.util.Map;
 
 @Slf4j
-@Component
+@Component("userInMemoryStorage")
 @RequiredArgsConstructor
-public class InMemoryUserStorage implements UserStorage {
+public class UserInMemoryStorage implements UserStorage {
     private final Map<Integer, User> users = new HashMap<>();
 
     @Override
@@ -65,5 +65,28 @@ public class InMemoryUserStorage implements UserStorage {
                 .max()
                 .orElse(0);
         return ++currentMaxId;
+    }
+
+    //Вынесла методы дружбы из сервиса в Storage
+
+    public void addToFriends(Integer userId, Integer friendId) {
+        getById(userId).getFriends().add(friendId);
+    }
+
+    public void removeFromFriends(Integer userId, Integer friendId) {
+        getById(userId).getFriends().remove(friendId);
+    }
+
+    public List<User> findFriends(Integer id) {
+        return getById(id).getFriends().stream()
+                .map(this::getById)
+                .toList();
+    }
+
+    public List<User> findCommonFriends(Integer firstId, Integer secondId) {
+        return getById(firstId).getFriends().stream()
+                .filter(id -> getById(secondId).getFriends().contains(id))
+                .map(this::getById)
+                .toList();
     }
 }

@@ -5,7 +5,7 @@ import org.junit.jupiter.api.Test;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.storage.InMemoryUserStorage;
+import ru.yandex.practicum.filmorate.storage.UserInMemoryStorage;
 import ru.yandex.practicum.filmorate.storage.UserStorage;
 
 import java.time.LocalDate;
@@ -21,7 +21,7 @@ class UserServiceTest {
 
     @BeforeEach
     void beforeEach() {
-        userStorage = new InMemoryUserStorage();
+        userStorage = new UserInMemoryStorage();
         userService = new UserService(userStorage);
 
         user = new User();

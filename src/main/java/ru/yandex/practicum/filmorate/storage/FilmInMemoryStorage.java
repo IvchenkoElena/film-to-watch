@@ -7,6 +7,7 @@ import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -14,11 +15,11 @@ import java.util.Map;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class InMemoryFilmStorage implements FilmStorage {
+public class FilmInMemoryStorage implements FilmStorage {
     private final Map<Integer, Film> films = new HashMap<>();
 
     @Override
-    public List<Film> getAll() {
+    public List<Film> findAll() {
         return new ArrayList<>(films.values());
     }
 
@@ -66,5 +67,20 @@ public class InMemoryFilmStorage implements FilmStorage {
                 .max()
                 .orElse(0);
         return ++currentMaxId;
+    }
+
+    public void addLike(Integer filmId, Integer userId) {
+        getById(filmId).getLikes().add(userId);
+    }
+
+    public void removeLike(Integer filmId, Integer userId) {
+        getById(filmId).getLikes().remove(userId);
+    }
+
+    public List<Film> bestFilms(int count) {
+        return findAll().stream()
+                .sorted(Comparator.comparingInt(Film::getLikesCount).reversed())
+                .limit(count)
+                .toList();
     }
 }
