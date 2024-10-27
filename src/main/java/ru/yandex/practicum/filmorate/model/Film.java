@@ -16,17 +16,22 @@ public class Film {
     private Integer id;
     @NotBlank
     private String name;
+    @NotNull
     @Size(max = 200)
     private String description;
     @NotNull
     private LocalDate releaseDate;
+    @NotNull
     @Positive
     private Integer duration;
-    private final Set<Integer> likes = new HashSet<>();
+    private Integer likesCount; //я должна прямо в базе данных теперь добавить такую колонку?
+    //и в сервисе в методах добавления и снятия лайка делать изменения в БД?
+    private final Set<Integer> likes = new HashSet<>(); //список лайков можно будет совсем удалить? он не проверяется в тестах?
+    @NotNull
     private Mpa mpa;
     private Set<Genre> genres = new HashSet<>();
 
-    public int getLikesCount() {
-        return likes.size();
+    public void addGenre(Genre genre) {
+        getGenres().add(genre);
     }
 }

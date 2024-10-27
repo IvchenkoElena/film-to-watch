@@ -16,7 +16,6 @@ import ru.yandex.practicum.filmorate.storage.UserStorage;
 import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 @Slf4j
 @Service
@@ -38,28 +37,14 @@ public class FilmService {
 
     public List<Film> findAllFilms() {
         final List<Film> films = filmStorage.findAll();
-        for (Film film : films) {
-            Integer filmId = film.getId();
-            Mpa mpa = mpaStorage.findByFilmId(filmId);
-            if (mpa != null) {
-                film.setMpa(mpa);
-            }
-            List<Genre> genres = genreStorage.getGenresByFilmId(filmId);
-            if (genres != null) {
-                Set<Genre> notDuplicateGenres = new HashSet<>(genres);
-                film.setGenres(notDuplicateGenres);
-            }
-        }
+        genreStorage.load(films); //тут использовала новый метод загрузки жанров
         return films;
     }
 
     public Film findById(Integer filmId) {
         Film film = filmStorage.getById(filmId);
-        Mpa mpa = mpaStorage.findByFilmId(filmId);
-        film.setMpa(mpa);
-        List<Genre> genres = genreStorage.getGenresByFilmId(filmId);
-        Set<Genre> notDuplicateGenres = new HashSet<>(genres);
-        film.setGenres(notDuplicateGenres);
+        film.setGenres(genreStorage.getGenresByFilmId(filmId)); // здесь оставила через отдельный запрос
+        //или надо тут тоже как-то применить метод загрузки жанров, но только для одного фильма?
         return film;
     }
 
@@ -98,7 +83,7 @@ public class FilmService {
             log.error(message);
             throw new ValidationException(message);
         }
-        if (newFilm.getMpa() != null && !mpaStorage.findAll().stream().map(Mpa::getId).toList().contains(newFilm.getMpa().getId())) {
+        if (newFilm.getMpa() == null || !mpaStorage.findAll().stream().map(Mpa::getId).toList().contains(newFilm.getMpa().getId())) {
             String message = "Рейтинг должен быть существующим";
             log.error(message);
             throw new ValidationException(message);
@@ -142,24 +127,12 @@ public class FilmService {
             log.error(message);
             throw new NotFoundException(message);
         }
-//        if (!filmStorage.getById(filmId).getLikes().contains(userId)) {
-//            String message = "Пользователь еще не оценил этот фильм";
-//            log.error(message);
-//            throw new ValidationException(message);
-//        }
         filmStorage.removeLike(filmId, userId);
     }
 
     public List<Film> bestFilms(int count) {
         final List<Film> films = filmStorage.bestFilms(count);
-        for (Film film : films) {
-            Integer filmId = film.getId();
-            Mpa mpa = mpaStorage.findByFilmId(filmId);
-            film.setMpa(mpa);
-            List<Genre> genres = genreStorage.getGenresByFilmId(filmId);
-            Set<Genre> notDuplicateGenres = new HashSet<>(genres);
-            film.setGenres(notDuplicateGenres);
-        }
+        genreStorage.load(films);//новый метод загрузки жанров
         return films;
     }
 }

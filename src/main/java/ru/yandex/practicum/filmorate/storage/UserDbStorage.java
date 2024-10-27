@@ -27,7 +27,6 @@ public class UserDbStorage extends BaseRepository<User> implements UserStorage {
     private static final String FIND_FRIEND_QUERY = "SELECT u.* FROM users u JOIN friendship f ON f.friend_id = u.user_id WHERE f.user_id = ?";
     private static final String FIND_COMMON_FRIENDS_QUERY = "SELECT u.* FROM users u JOIN friendship f ON f.friend_id = u.user_id WHERE f.user_id = ? AND f.friend_id IN (SELECT friend_id FROM friendship WHERE user_id = ?)";
 
-
     // Инициализируем репозиторий
     @Autowired
     public UserDbStorage(JdbcTemplate jdbc, RowMapper<User> mapper) {
@@ -74,13 +73,6 @@ public class UserDbStorage extends BaseRepository<User> implements UserStorage {
                 newUser.getBirthday()
         );
         newUser.setId(id);
-        Set<Integer> friends = newUser.getFriends();
-        if (friends != null) {
-            for (int friendId : friends) {
-                addToFriends(id, friendId);
-            }
-        }
-
         return newUser;
     }
 

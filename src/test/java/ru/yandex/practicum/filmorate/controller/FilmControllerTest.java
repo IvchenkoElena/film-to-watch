@@ -1,4 +1,4 @@
-package ru.yandex.practicum.filmorate.service;
+package ru.yandex.practicum.filmorate.controller;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,10 +11,10 @@ import java.time.LocalDate;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
-public class FilmServiceTest {
+class FilmControllerTest {
 
     @Autowired
-    private FilmService filmService; // ЭТО ПОЛЕ ТАКЖЕ СЕРОЕ И НАПИСАНО: Private field 'filmService' is never assigned
+    private FilmController filmController; //это поле серое и написано: Private field 'filmController' is never assigned
 
     @Test
     void createFilm() {
@@ -29,7 +29,7 @@ public class FilmServiceTest {
         mpa.setDescription("У фильма нет возрастных ограничений");
         newFilm.setMpa(mpa);
 
-        Film createdFilm = filmService.createFilm(newFilm);
+        Film createdFilm = filmController.create(newFilm);
         assertNotNull(createdFilm.getId());
         assertEquals(newFilm.getName(), createdFilm.getName());
         assertEquals(newFilm.getDescription(), createdFilm.getDescription());
@@ -45,10 +45,14 @@ public class FilmServiceTest {
         newFilm.setDescription("film");
         newFilm.setReleaseDate(LocalDate.of(2020, 4, 1));
         newFilm.setDuration(120);
-        newFilm.setMpa(new Mpa(1, "G", "У фильма нет возрастных ограничений"));
+        Mpa mpa = new Mpa();
+        mpa.setId(1);
+        mpa.setName("G");
+        mpa.setDescription("У фильма нет возрастных ограничений");
+        newFilm.setMpa(mpa);
 
-        Film createdFilm = filmService.createFilm(newFilm);
-        Film retrievedFilm = filmService.findById(createdFilm.getId());
+        Film createdFilm = filmController.create(newFilm);
+        Film retrievedFilm = filmController.findById(createdFilm.getId());
         assertEquals(createdFilm.getId(), retrievedFilm.getId());
         assertEquals(createdFilm.getName(), retrievedFilm.getName());
         assertEquals(createdFilm.getDescription(), retrievedFilm.getDescription());
