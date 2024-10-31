@@ -1,5 +1,8 @@
 package ru.yandex.practicum.filmorate.service;
 
+import lombok.AccessLevel;
+import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -11,10 +14,12 @@ import java.time.LocalDate;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
+@FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
+@RequiredArgsConstructor(onConstructor_ = @Autowired)
 public class FilmServiceTest {
 
     @Autowired
-    private FilmService filmService; // ЭТО ПОЛЕ ТАКЖЕ СЕРОЕ И НАПИСАНО: Private field 'filmService' is never assigned
+    FilmService filmService;
 
     @Test
     void createFilm() {

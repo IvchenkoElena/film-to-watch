@@ -43,8 +43,9 @@ public class FilmService {
 
     public Film findById(Integer filmId) {
         Film film = filmStorage.getById(filmId);
-        film.setGenres(genreStorage.getGenresByFilmId(filmId)); // здесь оставила через отдельный запрос
+        //film.setGenres(genreStorage.getGenresByFilmId(filmId)); // здесь оставила через отдельный запрос
         //или надо тут тоже как-то применить метод загрузки жанров, но только для одного фильма?
+        genreStorage.load(List.of(film));
         return film;
     }
 
