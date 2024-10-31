@@ -1,7 +1,7 @@
 package ru.yandex.practicum.filmorate.service;
 
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
@@ -12,16 +12,18 @@ import java.util.List;
 
 @Slf4j
 @Service
-@RequiredArgsConstructor
 public class UserService {
     private final UserStorage userStorage;
+
+    public UserService(@Qualifier("userDbStorage") UserStorage userStorage) {
+        this.userStorage = userStorage;
+    }
 
     public List<User> findAllUsers() {
         return userStorage.findAll();
     }
 
     public User findById(Integer userId) {
-
         return userStorage.getById(userId);
     }
 
@@ -59,32 +61,31 @@ public class UserService {
         }
     }
 
-    public void addToFriends(Integer firstId, Integer secondId) {
-        if (userStorage.getById(firstId).getFriends().contains(secondId)) {
+    //Вынесла бизнес логику методов дружбы из сервиса в Storage
+
+    public void addToFriends(Integer userId, Integer friendId) {
+        userStorage.getById(userId);
+        userStorage.getById(friendId);
+        if (userStorage.getById(userId).getFriends().contains(friendId)) {
             String message = "Пользователи уже дружат";
             log.error(message);
             throw new ValidationException(message);
         }
-        userStorage.getById(firstId).getFriends().add(secondId);
-        userStorage.getById(secondId).getFriends().add(firstId);
+        userStorage.addToFriends(userId, friendId);
     }
 
-    public void removeFromFriends(Integer firstId, Integer secondId) {
-
-        userStorage.getById(firstId).getFriends().remove(secondId);
-        userStorage.getById(secondId).getFriends().remove(firstId);
+    public void removeFromFriends(Integer userId, Integer friendId) {
+        userStorage.getById(userId);
+        userStorage.getById(friendId);
+        userStorage.removeFromFriends(userId, friendId);
     }
 
     public List<User> findFriends(Integer id) {
-        return userStorage.getById(id).getFriends().stream()
-                .map(userStorage::getById)
-                .toList();
+        userStorage.getById(id);
+        return userStorage.findFriends(id);
     }
 
-    public List<User> findMutualFriends(Integer firstId, Integer secondId) {
-        return userStorage.getById(firstId).getFriends().stream()
-                .filter(id -> userStorage.getById(secondId).getFriends().contains(id))
-                .map(userStorage::getById)
-                .toList();
+    public List<User> findCommonFriends(Integer firstId, Integer secondId) {
+        return userStorage.findCommonFriends(firstId, secondId);
     }
 }

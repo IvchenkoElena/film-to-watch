@@ -38,7 +38,7 @@ public class UserController {
     public List<User> findMutualFriends(@PathVariable Integer id,
                                         @PathVariable Integer friendId) {
         log.info("Получение списка общих друзей пользователей с ID {}, {}", id, friendId);
-        return userService.findMutualFriends(id, friendId);
+        return userService.findCommonFriends(id, friendId);
     }
 
     @PostMapping
@@ -57,7 +57,7 @@ public class UserController {
     public void addToFriends(@PathVariable Integer id,
                              @PathVariable Integer friendId) {
         userService.addToFriends(id, friendId);
-        log.info("Пользователи с ID {} и {} добавлены в друзья", id, friendId);
+        log.info("Пользователь с ID {} добавлен в друзья пользоввтелю ID {}", friendId, id);
     }
 
     @DeleteMapping("/{id}/friends/{friendId}")
