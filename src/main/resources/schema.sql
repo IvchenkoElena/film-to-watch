@@ -50,5 +50,5 @@ CREATE TABLE IF NOT EXISTS reviews (
     is_positive boolean NOT NULL,
     user_id int NOT NULL REFERENCES users(user_id),
     film_id int NOT NULL REFERENCES films(film_id),
-    useful bigint DEFAULT 0
+    useful bigint DEFAULT 0 NOT NULL
 )

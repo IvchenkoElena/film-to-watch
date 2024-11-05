@@ -36,12 +36,11 @@ public class ReviewDbStorage extends BaseRepository<Review> implements ReviewSto
 
     @Override
     public Review update(Review modifiedReview) {
-        String query = "UPDATE reviews SET content = ?, is_positive = ?, useful = ? WHERE review_id = ?";
+        String query = "UPDATE reviews SET content = ?, is_positive = ? WHERE review_id = ?";
         update(
                 query,
                 modifiedReview.getContent(),
                 modifiedReview.getIsPositive(),
-                modifiedReview.getUseful(),
                 modifiedReview.getReviewId()
         );
         //пришлось немного заморочиться, т.к. в базовом репозитории метод update() возвращает void
