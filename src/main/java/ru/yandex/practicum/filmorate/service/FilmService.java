@@ -43,8 +43,6 @@ public class FilmService {
 
     public Film findById(Integer filmId) {
         Film film = filmStorage.getById(filmId);
-        //film.setGenres(genreStorage.getGenresByFilmId(filmId)); // здесь оставила через отдельный запрос
-        //или надо тут тоже как-то применить метод загрузки жанров, но только для одного фильма?
         genreStorage.load(List.of(film));
         return film;
     }
@@ -101,7 +99,7 @@ public class FilmService {
     }
 
     public void addLike(Integer filmId, Integer userId) {
-        // ищем пользователй с такими ID
+        // ищем фильм и пользователя с такими ID
         if (filmStorage.getById(filmId) == null) {
             String message = "Фильм с id = " + filmId + " не найден";
             log.error(message);
@@ -117,11 +115,12 @@ public class FilmService {
             log.error(message);
             throw new ValidationException(message);
         }
-        filmStorage.addLike(filmId, userId);
+        Integer likesCount = filmStorage.getById(filmId).getLikesCount() + 1;
+        filmStorage.addLike(filmId, userId, likesCount);
     }
 
     public void removeLike(Integer filmId, Integer userId) {
-        // ищем пользователй с такими ID
+        // ищем фильм и пользователя с такими ID
         if (filmStorage.getById(filmId) == null) {
             String message = "Фильм с id = " + filmId + " не найден";
             log.error(message);
@@ -132,7 +131,8 @@ public class FilmService {
             log.error(message);
             throw new NotFoundException(message);
         }
-        filmStorage.removeLike(filmId, userId);
+        Integer likesCount = filmStorage.getById(filmId).getLikesCount() - 1;
+        filmStorage.removeLike(filmId, userId, likesCount);
     }
 
     public List<Film> bestFilms(int count) {
