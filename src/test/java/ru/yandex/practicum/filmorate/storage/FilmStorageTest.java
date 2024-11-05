@@ -73,4 +73,15 @@ class FilmStorageTest {
                 .isNotNull()
                 .hasFieldOrPropertyWithValue("releaseDate", LocalDate.of(2000, 1, 1));
     }
+
+    @Test
+    public void testDeleteFilm() {
+        filmStorage.removeFilm(1);
+
+        assertThat(filmStorage.findAll())
+                .isNotEmpty()
+                .hasSize(3)
+                .filteredOn("name", "Тень")
+                .isEmpty();
+    }
 }

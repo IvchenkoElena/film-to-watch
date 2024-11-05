@@ -83,4 +83,14 @@ public class UserStorageTest {
                 .hasFieldOrPropertyWithValue("email", "TheSparrow@yandex.ru")
                 .hasFieldOrPropertyWithValue("birthday", LocalDate.of(2000, 1, 1));
     }
+
+    @Test
+    public void deleteUser() {
+        userStorage.removeUser(1);
+
+        assertThat(userStorage.findAll()).isNotEmpty()
+                .hasSize(2)
+                .filteredOn("name", "Capitan")
+                .isEmpty();
+    }
 }

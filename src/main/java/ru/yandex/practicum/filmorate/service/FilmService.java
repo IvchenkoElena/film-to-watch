@@ -61,6 +61,10 @@ public class FilmService {
         return filmStorage.update(newFilm);
     }
 
+    public void removeFilm(Integer filmId) {
+        filmStorage.removeFilm(filmId);
+    }
+
     //методы валидации
 
     private void filmValidation(Film newFilm) {

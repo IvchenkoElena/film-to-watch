@@ -21,6 +21,7 @@ public class FilmDbStorage extends BaseRepository<Film> implements FilmStorage {
     private static final String UPDATE_QUERY = "UPDATE FILMS SET NAME = ?, DESCRIPTION = ?, RELEASE_DATE = ?, DURATION = ?, RATING_ID = ?" +
             "WHERE FILM_ID = ?";
     private static final String INSERT_QUERY = "INSERT INTO FILMS(NAME, DESCRIPTION, RELEASE_DATE, DURATION, RATING_ID) VALUES(?, ?, ?, ?, ?)";
+    private static final String DELETE_FILM_QUERY = "DELETE FROM films WHERE film_id = ?";
     private static final String INSERT_LIKE_QUERY = "INSERT INTO likes(film_id, user_id) VALUES(?, ?)";
     private static final String DELETE_LIKE_QUERY = "DELETE FROM LIKES WHERE FILM_ID = ? AND USER_ID = ?";
     private static final String INSERT_FILM_GENRE_QUERY = "INSERT INTO film_genre(FILM_ID, GENRE_ID) VALUES(?, ?)";
@@ -90,6 +91,14 @@ public class FilmDbStorage extends BaseRepository<Film> implements FilmStorage {
             }
         }
         return newFilm;
+    }
+
+    @Override
+    public void removeFilm(Integer filmId) {
+        boolean resultQuery = delete(DELETE_FILM_QUERY, filmId);
+        if (!resultQuery) {
+            throw new NotFoundException(String.format("Фильм с ID %d не найден", filmId));
+        }
     }
 
     @Override

@@ -14,6 +14,8 @@ public interface FilmStorage {
 
     Film update(@RequestBody Film newFilm);
 
+    void removeFilm(Integer filmId);
+
     void addLike(Integer filmId, Integer userId);
 
     void removeLike(Integer filmId, Integer userId);

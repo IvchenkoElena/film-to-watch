@@ -39,6 +39,10 @@ public class UserService {
         return userStorage.update(newUser);
     }
 
+    public void removeUser(Integer userId) {
+        userStorage.removeUser(userId);
+    }
+
     //метод валидации
     private void userValidation(User newUser) {
         if (newUser.getEmail() == null || newUser.getEmail().isBlank() || !newUser.getEmail().contains("@")) {
