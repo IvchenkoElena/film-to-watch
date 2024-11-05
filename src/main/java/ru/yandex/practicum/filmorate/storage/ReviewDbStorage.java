@@ -43,7 +43,7 @@ public class ReviewDbStorage extends BaseRepository<Review> implements ReviewSto
                 modifiedReview.getIsPositive(),
                 modifiedReview.getReviewId()
         );
-        //пришлось немного заморочиться, т.к. в базовом репозитории метод update() возвращает void
+        //Пришлось немного заморочиться, т.к. в базовом репозитории метод update() возвращает void
         return getById(modifiedReview.getReviewId());
     }
 
