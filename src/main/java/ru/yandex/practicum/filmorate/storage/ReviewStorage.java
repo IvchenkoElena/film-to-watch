@@ -10,18 +10,18 @@ public interface ReviewStorage {
 
     Review update(@RequestBody Review modifiedReview);
 
-    void deleteById(Long id);
+    void deleteById(Integer id);
 
-    Review getById(Long id);
+    Review getById(Integer id);
 
     //Получение всех отзывов по идентификатору фильма, если фильм не указан то все. Если кол-во не указано, то 10.
-    List<Review> getByParams(Long filmId, Long count);
+    List<Review> getByParams(Integer filmId, Integer count);
 
-    void addLike (Long reviewId, Long userId); //Пользователь ставит лайк отзыву.
+    void addLike (Integer reviewId, Integer userId); //Пользователь ставит лайк отзыву.
 
-    void addDislike (Long reviewId, Long userId); //Пользователь ставит дизлайк отзыву.
+    void addDislike (Integer reviewId, Integer userId); //Пользователь ставит дизлайк отзыву.
 
-    void deleteLike (Long reviewId, Long userId); //Пользователь удаляет лайк отзыву.
+    void deleteLike (Integer reviewId, Integer userId); //Пользователь удаляет лайк отзыву.
 
-    void deleteDislike (Long reviewId, Long userId); //Пользователь удаляет дизлайк отзыву.
+    void deleteDislike (Integer reviewId, Integer userId); //Пользователь удаляет дизлайк отзыву.
 }
