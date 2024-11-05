@@ -66,11 +66,11 @@ public class ReviewDbStorage extends BaseRepository<Review> implements ReviewSto
         String query;
         if (filmId != null) {
             query = "SELECT * FROM reviews WHERE film_id = ? ORDER BY useful DESC LIMIT ?";
+            return jdbc.query(query, ReviewRowMapper::makeReview, filmId, count);
         } else {
             query = "SELECT * FROM reviews ORDER BY useful DESC LIMIT ?";
+            return jdbc.query(query, ReviewRowMapper::makeReview, count);
         }
-
-        return jdbc.query(query, ReviewRowMapper::makeReview, count);
     }
 
     @Override
