@@ -63,10 +63,6 @@ public class ReviewDbStorage extends BaseRepository<Review> implements ReviewSto
 
     @Override
     public List<Review> getByParams(Integer filmId, Integer count) {
-        if (count == null) {
-            count = 10;
-        }
-
         String query;
         if (filmId != null) {
             query = "SELECT * FROM reviews WHERE film_id = ? ORDER BY useful DESC LIMIT ?";
