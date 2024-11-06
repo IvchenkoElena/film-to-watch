@@ -45,7 +45,7 @@ class FilmStorageTest {
     @Test
     public void testFindPopular() {
         final int count = 4;
-        Collection<Film> films = filmStorage.bestFilms(count);
+        Collection<Film> films = filmStorage.bestFilms(count, null, null);
 
         assertThat(films).isNotEmpty()
                 .hasSize(count)

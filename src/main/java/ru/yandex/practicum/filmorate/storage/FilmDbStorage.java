@@ -151,7 +151,32 @@ public class FilmDbStorage extends BaseRepository<Film> implements FilmStorage {
     }
 
     @Override
-    public List<Film> bestFilms(int count) {
-        return findMany(FIND_BEST_FILMS_QUERY, count);
+    public List<Film> bestFilms(int count, Integer genreId, Integer year) {
+        if (genreId != null && year != null) {
+            String query = "SELECT f.*, r.NAME AS RATING_NAME, r.DESCRIPTION AS RATING_DESCRIPTION\n" +
+                    "FROM FILMS f\n" +
+                    "JOIN RATING r ON f.RATING_ID = r.RATING_ID\n" +
+                    "JOIN FILM_GENRE fg ON f.FILM_ID = fg.FILM_ID\n" +
+                    "WHERE FG.GENRE_ID = ? AND EXTRACT(YEAR FROM release_date) = ?\n" +
+                    "ORDER BY f.likes_count DESC LIMIT ?";
+            return findMany(query, genreId, year, count);
+        } else if (genreId != null) {
+            String query = "SELECT f.*, r.NAME AS RATING_NAME, r.DESCRIPTION AS RATING_DESCRIPTION\n" +
+                    "FROM FILMS f\n" +
+                    "JOIN RATING r ON f.RATING_ID = r.RATING_ID\n" +
+                    "JOIN FILM_GENRE fg ON f.FILM_ID = fg.FILM_ID\n" +
+                    "WHERE FG.GENRE_ID = ? ORDER BY f.likes_count DESC LIMIT ?";
+            return findMany(query, genreId, count);
+        } else if (year != null) {
+            String query = "SELECT f.*, r.NAME AS RATING_NAME, r.DESCRIPTION AS RATING_DESCRIPTION\n" +
+                    "FROM FILMS f\n" +
+                    "JOIN RATING r ON f.RATING_ID = r.RATING_ID\n" +
+                    "WHERE EXTRACT(YEAR FROM release_date) = ?\n" +
+                    "ORDER BY f.likes_count DESC LIMIT ?";
+            return findMany(query, year, count);
+        } else {
+            return findMany(FIND_BEST_FILMS_QUERY, count);
+        }
     }
+
 }
