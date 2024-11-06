@@ -51,4 +51,12 @@ CREATE TABLE IF NOT EXISTS reviews (
     user_id int NOT NULL REFERENCES users(user_id),
     film_id int NOT NULL REFERENCES films(film_id),
     useful bigint DEFAULT 0 NOT NULL
-)
+);
+
+CREATE TABLE IF NOT EXISTS review_likes_dislikes (
+    review_id int NOT NULL REFERENCES reviews(review_id),
+    user_id int NOT NULL REFERENCES users(user_id),
+    is_like boolean NOT NULL,
+    is_dislike boolean NOT NULL,
+    PRIMARY KEY (review_id, user_id)
+);

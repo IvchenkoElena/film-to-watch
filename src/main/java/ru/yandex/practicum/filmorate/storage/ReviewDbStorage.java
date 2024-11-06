@@ -73,29 +73,59 @@ public class ReviewDbStorage extends BaseRepository<Review> implements ReviewSto
 
     @Override
     public void addLike(Integer reviewId, Integer userId) {
-        String query = "UPDATE reviews SET useful = ? WHERE review_id = ?";
-        Review modifiedReview = getById(reviewId);
-        update(query, modifiedReview.getUseful() + 1, reviewId);
+//        String query = "UPDATE reviews SET useful = ? WHERE review_id = ?";
+//        Review modifiedReview = getById(reviewId);
+//        update(query, modifiedReview.getUseful() + 1, reviewId);
+
+        Boolean isLike = true;
+        Boolean isDislike = false;
+        String query = "MERGE INTO REVIEW_LIKES_DISLIKES(review_id, user_id, is_like, is_dislike) KEY(REVIEW_ID,USER_ID) VALUES(?, ?, ?, ?)";
+        update(query, reviewId, userId, isLike, isDislike);
+        updateUsefulRateByReviewId(reviewId);
+
     }
 
     @Override
     public void addDislike(Integer reviewId, Integer userId) {
-        String query = "UPDATE reviews SET useful = ? WHERE review_id = ?";
-        Review modifiedReview = getById(reviewId);
-        update(query, modifiedReview.getUseful() - 1, reviewId);
+//        String query = "UPDATE reviews SET useful = ? WHERE review_id = ?";
+//        Review modifiedReview = getById(reviewId);
+//        update(query, modifiedReview.getUseful() - 1, reviewId);
+
+        Boolean isLike = false;
+        Boolean isDislike = true;
+        String query = "MERGE INTO REVIEW_LIKES_DISLIKES(review_id, user_id, is_like, is_dislike) KEY(REVIEW_ID,USER_ID) VALUES(?, ?, ?, ?)";
+        update(query, reviewId, userId, isLike, isDislike);
+        updateUsefulRateByReviewId(reviewId);
     }
 
     @Override
     public void deleteLike(Integer reviewId, Integer userId) {
-        String query = "UPDATE reviews SET useful = ? WHERE review_id = ?";
-        Review modifiedReview = getById(reviewId);
-        update(query, modifiedReview.getUseful() - 1, reviewId);
+//        String query = "UPDATE reviews SET useful = ? WHERE review_id = ?";
+//        Review modifiedReview = getById(reviewId);
+//        update(query, modifiedReview.getUseful() - 1, reviewId);
+
+        Boolean isLike = false;
+        String query = "MERGE INTO REVIEW_LIKES_DISLIKES(review_id, user_id, is_like) KEY(REVIEW_ID,USER_ID) VALUES(?, ?, ?)";
+        update(query, reviewId, userId, isLike);
+        updateUsefulRateByReviewId(reviewId);
     }
 
     @Override
     public void deleteDislike(Integer reviewId, Integer userId) {
-        String query = "UPDATE reviews SET useful = ? WHERE review_id = ?";
-        Review modifiedReview = getById(reviewId);
-        update(query, modifiedReview.getUseful() + 1, reviewId);
+//        String query = "UPDATE reviews SET useful = ? WHERE review_id = ?";
+//        Review modifiedReview = getById(reviewId);
+//        update(query, modifiedReview.getUseful() + 1, reviewId);
+
+        Boolean isDislike = false;
+        String query = "MERGE INTO REVIEW_LIKES_DISLIKES(review_id, user_id, is_dislike) KEY(REVIEW_ID,USER_ID) VALUES(?, ?, ?)";
+        update(query, reviewId, userId, isDislike);
+        updateUsefulRateByReviewId(reviewId);
+    }
+
+    private Long updateUsefulRateByReviewId(Integer reviewId) {
+        String query = "SELECT (SUM(is_like) - SUM(IS_DISLIKE)) FROM REVIEW_LIKES_DISLIKES WHERE review_id = ?";
+        Long useful = jdbc.queryForObject(query, Long.class, reviewId);
+        update("UPDATE reviews SET useful = ? WHERE review_id = ?", useful, reviewId);
+        return useful;
     }
 }
