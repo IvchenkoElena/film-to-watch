@@ -28,6 +28,12 @@ public class UserController {
         return userService.findById(userId);
     }
 
+    @DeleteMapping("/{userId}")
+    public void removeUserById(@PathVariable Integer userId) {
+        userService.removeUser(userId);
+        log.info("Удаление пользователя с ID {}", userId);
+    }
+
     @GetMapping("/{id}/friends")
     public List<User> findFriends(@PathVariable Integer id) {
         log.info("Получение списка друзей пользователя с ID {}", id);

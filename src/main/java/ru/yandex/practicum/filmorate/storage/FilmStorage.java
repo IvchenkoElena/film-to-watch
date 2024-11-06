@@ -14,9 +14,11 @@ public interface FilmStorage {
 
     Film update(@RequestBody Film newFilm);
 
-    void addLike(Integer filmId, Integer userId);
+    void removeFilm(Integer filmId);
 
-    void removeLike(Integer filmId, Integer userId);
+    void addLike(Integer filmId, Integer userId, Integer likesCount);
+
+    void removeLike(Integer filmId, Integer userId, Integer likesCount);
 
     List<Film> bestFilms(int count);
 

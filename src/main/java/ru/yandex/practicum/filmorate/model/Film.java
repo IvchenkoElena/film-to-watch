@@ -8,6 +8,7 @@ import lombok.Data;
 
 import java.time.LocalDate;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Set;
 
 
@@ -24,12 +25,11 @@ public class Film {
     @NotNull
     @Positive
     private Integer duration;
-    private Integer likesCount; //я должна прямо в базе данных теперь добавить такую колонку?
-    //и в сервисе в методах добавления и снятия лайка делать изменения в БД?
-    private final Set<Integer> likes = new HashSet<>(); //список лайков можно будет совсем удалить? он не проверяется в тестах?
+    private Set<Integer> likes = new HashSet<>();
+    private Integer likesCount = 0;
     @NotNull
     private Mpa mpa;
-    private Set<Genre> genres = new HashSet<>();
+    private LinkedHashSet<Genre> genres = new LinkedHashSet<>();
 
     public void addGenre(Genre genre) {
         getGenres().add(genre);

@@ -39,6 +39,10 @@ public class UserService {
         return userStorage.update(newUser);
     }
 
+    public void removeUser(Integer userId) {
+        userStorage.removeUser(userId);
+    }
+
     //метод валидации
     private void userValidation(User newUser) {
         if (newUser.getEmail() == null || newUser.getEmail().isBlank() || !newUser.getEmail().contains("@")) {
@@ -51,7 +55,7 @@ public class UserService {
             log.error(message);
             throw new ValidationException(message);
         }
-        if (newUser.getName() == null) {
+        if (newUser.getName() == null || newUser.getName().isBlank()) {
             newUser.setName(newUser.getLogin());
         }
         if (newUser.getBirthday() == null || newUser.getBirthday().isAfter(LocalDate.now())) {

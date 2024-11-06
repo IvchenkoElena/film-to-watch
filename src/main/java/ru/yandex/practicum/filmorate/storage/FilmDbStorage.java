@@ -2,6 +2,7 @@ package ru.yandex.practicum.filmorate.storage;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Primary;
+import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
@@ -10,6 +11,9 @@ import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -18,16 +22,18 @@ import java.util.Set;
 @Primary
 public class FilmDbStorage extends BaseRepository<Film> implements FilmStorage {
 
-    private static final String UPDATE_QUERY = "UPDATE FILMS SET NAME = ?, DESCRIPTION = ?, RELEASE_DATE = ?, DURATION = ?, RATING_ID = ?" +
+    private static final String UPDATE_FILM_QUERY = "UPDATE FILMS SET NAME = ?, DESCRIPTION = ?, RELEASE_DATE = ?, DURATION = ?, RATING_ID = ?, LIKES_COUNT = ?" +
             "WHERE FILM_ID = ?";
+    private static final String UPDATE_LIKES_COUNT_QUERY = "UPDATE FILMS SET LIKES_COUNT = ? WHERE FILM_ID = ?";
     private static final String INSERT_QUERY = "INSERT INTO FILMS(NAME, DESCRIPTION, RELEASE_DATE, DURATION, RATING_ID) VALUES(?, ?, ?, ?, ?)";
+    private static final String DELETE_FILM_QUERY = "DELETE FROM films WHERE film_id = ?";
     private static final String INSERT_LIKE_QUERY = "INSERT INTO likes(film_id, user_id) VALUES(?, ?)";
     private static final String DELETE_LIKE_QUERY = "DELETE FROM LIKES WHERE FILM_ID = ? AND USER_ID = ?";
     private static final String INSERT_FILM_GENRE_QUERY = "INSERT INTO film_genre(FILM_ID, GENRE_ID) VALUES(?, ?)";
+    private static final String DELETE_FILM_GENRE_QUERY = "DELETE FROM film_genre WHERE FILM_ID = ?";
     private static final String FIND_ALL_QUERY = "SELECT f.*, r.NAME AS RATING_NAME, r.DESCRIPTION AS RATING_DESCRIPTION FROM FILMS f JOIN RATING r ON f.RATING_ID = r.RATING_ID";
     private static final String FIND_BY_ID_QUERY = FIND_ALL_QUERY + " WHERE f.FILM_ID = ?";
-    private static final String FIND_BEST_FILMS_QUERY = FIND_ALL_QUERY +
-            " INNER JOIN (SELECT l.FILM_ID, COUNT(l.USER_ID) AS LIKES_COUNT FROM LIKES l GROUP BY l.FILM_ID ORDER BY COUNT(l.USER_ID) DESC LIMIT ?) AS flc ON f.FILM_ID = flc.FILM_ID ORDER BY flc.LIKES_COUNT DESC";
+    private static final String FIND_BEST_FILMS_QUERY = FIND_ALL_QUERY + " ORDER BY f.likes_count DESC LIMIT ?";
 
     // Инициализируем репозиторий
     @Autowired
@@ -49,25 +55,47 @@ public class FilmDbStorage extends BaseRepository<Film> implements FilmStorage {
     @Override
     public Film update(@RequestBody Film newFilm) {
         update(
-                UPDATE_QUERY,
+                UPDATE_FILM_QUERY,
                 newFilm.getName(),
                 newFilm.getDescription(),
                 newFilm.getReleaseDate(),
                 newFilm.getDuration(),
                 newFilm.getMpa().getId(),
+                newFilm.getLikes().size(),
                 newFilm.getId()
         );
-        Set<Genre> genres = newFilm.getGenres();
+        delete(DELETE_FILM_GENRE_QUERY, newFilm.getId());
+        LinkedHashSet<Genre> genres = newFilm.getGenres();
         if (genres != null) {
-            for (Genre genre : genres) {
-                update(INSERT_FILM_GENRE_QUERY, newFilm.getId(), genre.getId());
-            }
+            jdbc.batchUpdate(INSERT_FILM_GENRE_QUERY, new BatchPreparedStatementSetter() {
+                @Override
+                public void setValues(PreparedStatement ps, int i) throws SQLException {
+                    Genre genre = genres.stream().toList().get(i);
+                    ps.setInt(1, newFilm.getId());
+                    ps.setInt(2, genre.getId());
+                }
+
+                @Override
+                public int getBatchSize() {
+                    return genres.size();
+                }
+            });
         }
         Set<Integer> likes = newFilm.getLikes();
         if (likes != null) {
-            for (Integer userId : likes) {
-                update(INSERT_LIKE_QUERY, newFilm.getId(), userId);
-            }
+            jdbc.batchUpdate(INSERT_LIKE_QUERY, new BatchPreparedStatementSetter() {
+                @Override
+                public void setValues(PreparedStatement ps, int i) throws SQLException {
+                    Integer userId = likes.stream().toList().get(i);
+                    ps.setInt(1, newFilm.getId());
+                    ps.setInt(2, userId);
+                }
+
+                @Override
+                public int getBatchSize() {
+                    return likes.size();
+                }
+            });
         }
         return newFilm;
     }
@@ -83,23 +111,43 @@ public class FilmDbStorage extends BaseRepository<Film> implements FilmStorage {
                 newFilm.getMpa().getId()
         );
         newFilm.setId(id);
-        Set<Genre> genres = newFilm.getGenres();
+        LinkedHashSet<Genre> genres = newFilm.getGenres();
         if (genres != null) {
-            for (Genre genre : genres) {
-                update(INSERT_FILM_GENRE_QUERY, id, genre.getId());
-            }
+            jdbc.batchUpdate(INSERT_FILM_GENRE_QUERY, new BatchPreparedStatementSetter() {
+                @Override
+                public void setValues(PreparedStatement ps, int i) throws SQLException {
+                    Genre genre = genres.stream().toList().get(i);
+                    ps.setInt(1, id);
+                    ps.setInt(2, genre.getId());
+                }
+
+                @Override
+                public int getBatchSize() {
+                    return genres.size();
+                }
+            });
         }
         return newFilm;
     }
 
     @Override
-    public void addLike(Integer filmId, Integer userId) {
-        update(INSERT_LIKE_QUERY, filmId, userId);
+    public void removeFilm(Integer filmId) {
+        boolean resultQuery = delete(DELETE_FILM_QUERY, filmId);
+        if (!resultQuery) {
+            throw new NotFoundException(String.format("Фильм с ID %d не найден", filmId));
+        }
     }
 
     @Override
-    public void removeLike(Integer filmId, Integer userId) {
+    public void addLike(Integer filmId, Integer userId, Integer likesCount) {
+        update(INSERT_LIKE_QUERY, filmId, userId);
+        update(UPDATE_LIKES_COUNT_QUERY, likesCount, filmId);
+    }
+
+    @Override
+    public void removeLike(Integer filmId, Integer userId, Integer likesCount) {
         delete(DELETE_LIKE_QUERY, filmId, userId);
+        update(UPDATE_LIKES_COUNT_QUERY, likesCount, filmId);
     }
 
     @Override
