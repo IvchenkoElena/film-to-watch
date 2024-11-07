@@ -81,6 +81,7 @@ public class FilmDbStorage extends BaseRepository<Film> implements FilmStorage {
                     ps.setInt(1, newFilm.getId());
                     ps.setInt(2, genre.getId());
                 }
+
                 @Override
                 public int getBatchSize() {
                     return genres.size();
@@ -97,6 +98,7 @@ public class FilmDbStorage extends BaseRepository<Film> implements FilmStorage {
                     ps.setInt(1, newFilm.getId());
                     ps.setInt(2, director.getId());
                 }
+
                 @Override
                 public int getBatchSize() {
                     return directors.size();
@@ -112,6 +114,7 @@ public class FilmDbStorage extends BaseRepository<Film> implements FilmStorage {
                     ps.setInt(1, newFilm.getId());
                     ps.setInt(2, userId);
                 }
+
                 @Override
                 public int getBatchSize() {
                     return likes.size();
@@ -141,6 +144,7 @@ public class FilmDbStorage extends BaseRepository<Film> implements FilmStorage {
                     ps.setInt(1, id);
                     ps.setInt(2, genre.getId());
                 }
+
                 @Override
                 public int getBatchSize() {
                     return genres.size();
@@ -156,6 +160,7 @@ public class FilmDbStorage extends BaseRepository<Film> implements FilmStorage {
                     ps.setInt(1, id);
                     ps.setInt(2, director.getId());
                 }
+
                 @Override
                 public int getBatchSize() {
                     return directors.size();
