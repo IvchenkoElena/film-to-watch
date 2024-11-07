@@ -10,7 +10,6 @@ import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
@@ -22,7 +21,6 @@ import java.util.stream.Collectors;
 public class GenreDbStorage extends BaseRepository<Genre> implements GenreStorage {
     private static final String FIND_ALL_QUERY = "SELECT * FROM GENRES";
     private static final String FIND_BY_ID_QUERY = "SELECT * FROM GENRES WHERE GENRE_ID = ?";
-    private static final String FIND_GENRES_BY_FILM_ID_QUERY = "SELECT g.* FROM GENRES g JOIN film_genre fg ON g.GENRE_ID = fg.GENRE_ID WHERE fg.FILM_ID = ?";
     private static final String FIND_FILM_GENRES_QUERY = "SELECT g.*, fg.FILM_ID from GENRES g, film_genre fg where fg.GENRE_ID = g.GENRE_ID AND fg.FILM_ID in ";
 
     // Инициализируем репозиторий
@@ -38,10 +36,6 @@ public class GenreDbStorage extends BaseRepository<Genre> implements GenreStorag
     public Genre getById(int id) {
         return findOne(FIND_BY_ID_QUERY, id)
                 .orElseThrow(() -> new NotFoundException(String.format("Жанр c ID %d не найден", id)));
-    }
-
-    public HashSet<Genre> getGenresByFilmId(int id) {
-        return new HashSet<>(findMany(FIND_GENRES_BY_FILM_ID_QUERY, id));
     }
 
     public void loadGenres(List<Film> films) {

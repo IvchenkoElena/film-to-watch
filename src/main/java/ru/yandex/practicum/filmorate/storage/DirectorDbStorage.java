@@ -27,8 +27,6 @@ public class DirectorDbStorage extends BaseRepository<Director> implements Direc
     private static final String DELETE_DIRECTOR_QUERY =  "DELETE FROM directors WHERE director_id = ?";
     private static final String FIND_FILM_DIRECTORS_QUERY = "SELECT d.*, fd.FILM_ID from directors d, film_director fd where d.director_id = fd.director_id AND fd.FILM_ID in ";
 
-
-
     //Инициализируем репозиторий
     @Autowired
     public DirectorDbStorage(JdbcTemplate jdbc, RowMapper<Director> mapper) {

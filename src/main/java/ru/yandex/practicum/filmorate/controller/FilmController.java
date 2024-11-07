@@ -34,7 +34,6 @@ public class FilmController {
         log.info("Удаление фильма с ID {}", filmId);
     }
 
-
     @PostMapping
     public Film create(@RequestBody Film newFilm) {
         log.info("Создание нового фильма: {}", newFilm.toString());
