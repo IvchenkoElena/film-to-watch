@@ -13,5 +13,5 @@ public interface GenreStorage {
 
     HashSet<Genre> getGenresByFilmId(int id);
 
-    void load(List<Film> films);
+    void loadGenres(List<Film> films);
 }

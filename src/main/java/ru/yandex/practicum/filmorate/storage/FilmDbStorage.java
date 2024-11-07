@@ -8,11 +8,14 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 import org.springframework.web.bind.annotation.RequestBody;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
+import ru.yandex.practicum.filmorate.exception.ValidationException;
+import ru.yandex.practicum.filmorate.model.Director;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
@@ -31,9 +34,14 @@ public class FilmDbStorage extends BaseRepository<Film> implements FilmStorage {
     private static final String DELETE_LIKE_QUERY = "DELETE FROM LIKES WHERE FILM_ID = ? AND USER_ID = ?";
     private static final String INSERT_FILM_GENRE_QUERY = "INSERT INTO film_genre(FILM_ID, GENRE_ID) VALUES(?, ?)";
     private static final String DELETE_FILM_GENRE_QUERY = "DELETE FROM film_genre WHERE FILM_ID = ?";
-    private static final String FIND_ALL_QUERY = "SELECT f.*, r.NAME AS RATING_NAME, r.DESCRIPTION AS RATING_DESCRIPTION FROM FILMS f JOIN RATING r ON f.RATING_ID = r.RATING_ID";
+    private static final String INSERT_FILM_DIRECTOR_QUERY = "INSERT INTO film_director(film_id, director_id) VALUES(?, ?)";
+    private static final String DELETE_FILM_DIRECTOR_QUERY = "DELETE FROM film_director WHERE film_id = ?";
+    private static final String FIND_ALL_QUERY = "SELECT f.*, r.NAME AS RATING_NAME, r.DESCRIPTION AS RATING_DESCRIPTION, FROM FILMS f JOIN RATING r ON f.RATING_ID = r.RATING_ID";
     private static final String FIND_BY_ID_QUERY = FIND_ALL_QUERY + " WHERE f.FILM_ID = ?";
     private static final String FIND_BEST_FILMS_QUERY = FIND_ALL_QUERY + " ORDER BY f.likes_count DESC LIMIT ?";
+    private static final String FIND_DIRECTOR_FILMS_SORTED_BY_YEARS_QUERY = FIND_ALL_QUERY + " where f.film_id IN (SELECT film_id from film_director where director_id = ?) ORDER BY extract(year from f.release_date)";
+    private static final String FIND_DIRECTOR_FILMS_SORTED_BY_LIKES_QUERY = FIND_ALL_QUERY + " where f.film_id IN (SELECT film_id from film_director where director_id = ?) ORDER BY f.likes_count DESC";
+
 
     // Инициализируем репозиторий
     @Autowired
@@ -74,10 +82,25 @@ public class FilmDbStorage extends BaseRepository<Film> implements FilmStorage {
                     ps.setInt(1, newFilm.getId());
                     ps.setInt(2, genre.getId());
                 }
-
                 @Override
                 public int getBatchSize() {
                     return genres.size();
+                }
+            });
+        }
+        delete(DELETE_FILM_DIRECTOR_QUERY, newFilm.getId());
+        Set<Director> directors = newFilm.getDirectors();
+        if (directors != null) {
+            jdbc.batchUpdate(INSERT_FILM_DIRECTOR_QUERY, new BatchPreparedStatementSetter() {
+                @Override
+                public void setValues(PreparedStatement ps, int i) throws SQLException {
+                    Director director = directors.stream().toList().get(i);
+                    ps.setInt(1, newFilm.getId());
+                    ps.setInt(2, director.getId());
+                }
+                @Override
+                public int getBatchSize() {
+                    return directors.size();
                 }
             });
         }
@@ -90,7 +113,6 @@ public class FilmDbStorage extends BaseRepository<Film> implements FilmStorage {
                     ps.setInt(1, newFilm.getId());
                     ps.setInt(2, userId);
                 }
-
                 @Override
                 public int getBatchSize() {
                     return likes.size();
@@ -120,10 +142,24 @@ public class FilmDbStorage extends BaseRepository<Film> implements FilmStorage {
                     ps.setInt(1, id);
                     ps.setInt(2, genre.getId());
                 }
-
                 @Override
                 public int getBatchSize() {
                     return genres.size();
+                }
+            });
+        }
+        Set<Director> directors = newFilm.getDirectors();
+        if (directors != null) {
+            jdbc.batchUpdate(INSERT_FILM_DIRECTOR_QUERY, new BatchPreparedStatementSetter() {
+                @Override
+                public void setValues(PreparedStatement ps, int i) throws SQLException {
+                    Director director = directors.stream().toList().get(i);
+                    ps.setInt(1, id);
+                    ps.setInt(2, director.getId());
+                }
+                @Override
+                public int getBatchSize() {
+                    return directors.size();
                 }
             });
         }
@@ -153,5 +189,18 @@ public class FilmDbStorage extends BaseRepository<Film> implements FilmStorage {
     @Override
     public List<Film> bestFilms(int count) {
         return findMany(FIND_BEST_FILMS_QUERY, count);
+    }
+
+    @Override
+    public List<Film> findFilmsByDirector(Integer directorId, String sortBy) {
+        String sql;
+        if (sortBy.equals("year")) {
+            sql = FIND_DIRECTOR_FILMS_SORTED_BY_YEARS_QUERY;
+        } else if (sortBy.equals("likes")) {
+            sql = FIND_DIRECTOR_FILMS_SORTED_BY_LIKES_QUERY;
+        } else {
+            throw new ValidationException("Некорректный параметр сортировки");
+        }
+        return findMany(sql, directorId);
     }
 }

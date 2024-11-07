@@ -22,4 +22,5 @@ public interface FilmStorage {
 
     List<Film> bestFilms(int count);
 
+    List<Film> findFilmsByDirector(Integer directorId, String sortBy);
 }

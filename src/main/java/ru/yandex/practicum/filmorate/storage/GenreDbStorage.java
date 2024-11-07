@@ -44,7 +44,7 @@ public class GenreDbStorage extends BaseRepository<Genre> implements GenreStorag
         return new HashSet<>(findMany(FIND_GENRES_BY_FILM_ID_QUERY, id));
     }
 
-    public void load(List<Film> films) {
+    public void loadGenres(List<Film> films) {
         final Map<Integer, Film> filmById = films.stream().collect(Collectors.toMap(Film::getId, film -> film));
         String inSql = String.join(",", Collections.nCopies(films.size(), "?"));
 

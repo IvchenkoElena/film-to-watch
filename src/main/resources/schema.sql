@@ -41,8 +41,12 @@ CREATE TABLE IF NOT EXISTS films (
 	release_date date NOT NULL,
 	duration int NOT NULL,
 	rating_id int NOT NULL REFERENCES rating(rating_id) ON DELETE RESTRICT,
-	likes_count int NOT NULL DEFAULT 0,
-	director_id int NOT NULL REFERENCES directors(director_id) ON DELETE CASCADE
+	likes_count int NOT NULL DEFAULT 0
+);
+
+CREATE TABLE IF NOT EXISTS film_director (
+    film_id int NOT NULL REFERENCES films(film_id) ON DELETE CASCADE,
+    director_id int REFERENCES directors(director_id) ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS genres (

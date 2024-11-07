@@ -29,9 +29,15 @@ public class Film {
     private Integer likesCount = 0;
     @NotNull
     private Mpa mpa;
+    @NotNull
+    private Set<Director> directors = new HashSet<>();
     private LinkedHashSet<Genre> genres = new LinkedHashSet<>();
 
     public void addGenre(Genre genre) {
         getGenres().add(genre);
+    }
+
+    public void addDirector(Director director) {
+        getDirectors().add(director);
     }
 }
