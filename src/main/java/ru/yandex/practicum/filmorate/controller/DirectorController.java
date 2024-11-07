@@ -20,7 +20,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/directors")
 public class DirectorController {
-    final private DirectorService directorService;
+    private final DirectorService directorService;
 
     @GetMapping
     public List<Director> findAllDirectors() {
