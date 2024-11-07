@@ -56,7 +56,6 @@ CREATE TABLE IF NOT EXISTS reviews (
 CREATE TABLE IF NOT EXISTS review_likes_dislikes (
     review_id int NOT NULL REFERENCES reviews(review_id) on delete cascade,
     user_id int NOT NULL REFERENCES users(user_id) on delete cascade,
-    is_like boolean NOT NULL,
-    is_dislike boolean NOT NULL,
+    is_like boolean, -- TRUE = лайк, FALSE = дизлайк, NULL = отсутствие лайка/дизлайка
     PRIMARY KEY (review_id, user_id)
 );
