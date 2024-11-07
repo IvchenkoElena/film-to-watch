@@ -5,13 +5,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Primary;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
+import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.stereotype.Repository;
 import org.springframework.web.bind.annotation.RequestBody;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Director;
 import ru.yandex.practicum.filmorate.model.Film;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -24,13 +26,13 @@ public class DirectorDbStorage extends BaseRepository<Director> implements Direc
     private static final String FIND_DIRECTOR_BY_ID = "SELECT * FROM directors WHERE director_id = ?";
     private static final String INSERT_DIRECTOR_QUERY = "INSERT INTO directors(director_name) VALUES (?)";
     private static final String UPDATE_DIRECTOR_QUERY = "UPDATE directors SET director_name = ?  WHERE director_id = ?";
-    private static final String DELETE_DIRECTOR_QUERY =  "DELETE FROM directors WHERE director_id = ?";
+    private static final String DELETE_DIRECTOR_QUERY = "DELETE FROM directors WHERE director_id = ?";
     private static final String FIND_FILM_DIRECTORS_QUERY = "SELECT d.*, fd.FILM_ID from directors d, film_director fd where d.director_id = fd.director_id AND fd.FILM_ID in ";
 
     //Инициализируем репозиторий
     @Autowired
-    public DirectorDbStorage(JdbcTemplate jdbc, RowMapper<Director> mapper) {
-        super(jdbc, mapper);
+    public DirectorDbStorage(JdbcTemplate jdbc, NamedParameterJdbcTemplate namedJdbcTemplate, RowMapper<Director> mapper) {
+        super(jdbc, namedJdbcTemplate, mapper);
     }
 
     @Override
@@ -72,13 +74,24 @@ public class DirectorDbStorage extends BaseRepository<Director> implements Direc
         }
     }
 
+//    public void loadDirectorsOld(List<Film> films) {
+//        final Map<Integer, Film> filmById = films.stream().collect(Collectors.toMap(Film::getId, film -> film));
+//        String inSql = String.join(",", Collections.nCopies(films.size(), "?"));
+//
+//        jdbc.query(FIND_FILM_DIRECTORS_QUERY + "(" + inSql + ")", (rs) -> {
+//            final Film film = filmById.get(rs.getInt("FILM_ID"));
+//            film.addDirector(mapper.mapRow(rs, 0));
+//        }, films.stream().map(Film::getId).toArray());
+//    }
+
     public void loadDirectors(List<Film> films) {
         final Map<Integer, Film> filmById = films.stream().collect(Collectors.toMap(Film::getId, film -> film));
-        String inSql = String.join(",", Collections.nCopies(films.size(), "?"));
+        List<Integer> filmIds = films.stream().map(Film::getId).toList();
+        SqlParameterSource parameters = new MapSqlParameterSource("filmIds", filmIds);
 
-        jdbc.query(FIND_FILM_DIRECTORS_QUERY + "(" + inSql + ")", (rs) -> {
+        namedJdbcTemplate.query(FIND_FILM_DIRECTORS_QUERY + "(:filmIds)", parameters, (rs) -> {
             final Film film = filmById.get(rs.getInt("FILM_ID"));
             film.addDirector(mapper.mapRow(rs, 0));
-        }, films.stream().map(Film::getId).toArray());
+        });
     }
 }

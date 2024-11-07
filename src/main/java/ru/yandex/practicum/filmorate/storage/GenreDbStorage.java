@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Primary;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
@@ -25,8 +26,8 @@ public class GenreDbStorage extends BaseRepository<Genre> implements GenreStorag
 
     // Инициализируем репозиторий
     @Autowired
-    public GenreDbStorage(JdbcTemplate jdbc, RowMapper<Genre> mapper) {
-        super(jdbc, mapper);
+    public GenreDbStorage(JdbcTemplate jdbc, NamedParameterJdbcTemplate namedJdbcTemplate, RowMapper<Genre> mapper) {
+        super(jdbc, namedJdbcTemplate, mapper);
     }
 
     public List<Genre> findAll() {

@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Primary;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
 import org.springframework.web.bind.annotation.RequestBody;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
@@ -30,8 +31,8 @@ public class UserDbStorage extends BaseRepository<User> implements UserStorage {
 
     // Инициализируем репозиторий
     @Autowired
-    public UserDbStorage(JdbcTemplate jdbc, RowMapper<User> mapper) {
-        super(jdbc, mapper);
+    public UserDbStorage(JdbcTemplate jdbc, NamedParameterJdbcTemplate namedJdbcTemplate, RowMapper<User> mapper) {
+        super(jdbc, namedJdbcTemplate, mapper);
     }
 
     @Override
