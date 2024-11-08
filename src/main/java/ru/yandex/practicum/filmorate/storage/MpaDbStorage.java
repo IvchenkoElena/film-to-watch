@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Primary;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Mpa;
@@ -19,8 +20,8 @@ public class MpaDbStorage extends BaseRepository<Mpa> implements MpaStorage {
 
     // Инициализируем репозиторий
     @Autowired
-    public MpaDbStorage(JdbcTemplate jdbc, RowMapper<Mpa> mapper) {
-        super(jdbc, mapper);
+    public MpaDbStorage(JdbcTemplate jdbc, NamedParameterJdbcTemplate namedJdbcTemplate, RowMapper<Mpa> mapper) {
+        super(jdbc, namedJdbcTemplate, mapper);
     }
 
     public List<Mpa> findAll() {

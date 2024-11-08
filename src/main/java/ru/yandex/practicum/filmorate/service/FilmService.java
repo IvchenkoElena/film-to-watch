@@ -5,9 +5,11 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
+import ru.yandex.practicum.filmorate.model.Director;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.Mpa;
+import ru.yandex.practicum.filmorate.storage.DirectorStorage;
 import ru.yandex.practicum.filmorate.storage.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.GenreStorage;
 import ru.yandex.practicum.filmorate.storage.MpaStorage;
@@ -24,26 +26,31 @@ public class FilmService {
     private final UserStorage userStorage;
     private final GenreStorage genreStorage;
     private final MpaStorage mpaStorage;
+    private final DirectorStorage directorStorage;
 
     public FilmService(@Qualifier("filmDbStorage") FilmStorage filmStorage,
                        @Qualifier("userDbStorage") UserStorage userStorage,
                        @Qualifier("genreDbStorage") GenreStorage genreStorage,
-                       @Qualifier("mpaDbStorage") MpaStorage mpaStorage) {
+                       @Qualifier("mpaDbStorage") MpaStorage mpaStorage,
+                       @Qualifier("directorDbStorage") DirectorStorage directorStorage) {
         this.filmStorage = filmStorage;
         this.userStorage = userStorage;
         this.genreStorage = genreStorage;
         this.mpaStorage = mpaStorage;
+        this.directorStorage = directorStorage;
     }
 
     public List<Film> findAllFilms() {
         final List<Film> films = filmStorage.findAll();
-        genreStorage.load(films); //тут использовала новый метод загрузки жанров
+        genreStorage.loadGenres(films);
+        directorStorage.loadDirectors(films);
         return films;
     }
 
     public Film findById(Integer filmId) {
         Film film = filmStorage.getById(filmId);
-        genreStorage.load(List.of(film));
+        genreStorage.loadGenres(List.of(film));
+        directorStorage.loadDirectors(List.of(film));
         return film;
     }
 
@@ -96,6 +103,11 @@ public class FilmService {
             log.error(message);
             throw new ValidationException(message);
         }
+        if (newFilm.getDirectors() != null && !new HashSet<>(directorStorage.findAllDirectors().stream().map(Director::getId).toList()).containsAll(newFilm.getDirectors().stream().map(Director::getId).toList())) {
+            String message = "Режиссер должен быть существующим";
+            log.error(message);
+            throw new ValidationException(message);
+        }
     }
 
     public void addLike(Integer filmId, Integer userId) {
@@ -137,8 +149,15 @@ public class FilmService {
 
     public List<Film> bestFilms(int count, Integer genreId, Integer year) {
         final List<Film> films = filmStorage.bestFilms(count, genreId, year);
-        genreStorage.load(films);//новый метод загрузки жанров
+        genreStorage.loadGenres(films);
+        directorStorage.loadDirectors(films);
         return films;
     }
 
+    public List<Film> findFilmsByDirector(Integer directorId, String sortBy) {
+        final List<Film> films = filmStorage.findFilmsByDirector(directorId, sortBy);
+        genreStorage.loadGenres(films);
+        directorStorage.loadDirectors(films);
+        return films;
+    }
 }

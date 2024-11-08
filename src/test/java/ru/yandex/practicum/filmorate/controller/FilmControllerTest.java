@@ -14,7 +14,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class FilmControllerTest {
 
     @Autowired
-    private FilmController filmController; //это поле серое и написано: Private field 'filmController' is never assigned
+    private FilmController filmController;
 
     @Test
     void createFilm() {

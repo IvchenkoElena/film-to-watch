@@ -34,7 +34,6 @@ public class FilmController {
         log.info("Удаление фильма с ID {}", filmId);
     }
 
-
     @PostMapping
     public Film create(@RequestBody Film newFilm) {
         log.info("Создание нового фильма: {}", newFilm.toString());
@@ -66,5 +65,11 @@ public class FilmController {
                                 @RequestParam(required = false) Integer genreId,
                                 @RequestParam(required = false) Integer year) {
         return filmService.bestFilms(count, genreId, year);
+    }
+
+    @GetMapping("/director/{directorId}")
+    public List<Film> findFilmsByDirector(@PathVariable Integer directorId,
+                                      @RequestParam String sortBy) {
+        return filmService.findFilmsByDirector(directorId, sortBy);
     }
 }
