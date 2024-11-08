@@ -141,4 +141,9 @@ public class FilmService {
         return films;
     }
 
+    public List<Film> getCommonFilms(Integer userId, Integer friendId) {
+        final List<Film> films = filmStorage.getCommonFilms(userId, friendId);
+        genreStorage.load(films);
+        return films;
+    }
 }
