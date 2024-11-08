@@ -4,7 +4,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
+import ru.yandex.practicum.filmorate.model.Event;
+import ru.yandex.practicum.filmorate.model.EventOperation;
+import ru.yandex.practicum.filmorate.model.EventType;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.storage.EventStorage;
 import ru.yandex.practicum.filmorate.storage.UserStorage;
 
 import java.time.LocalDate;
@@ -14,9 +18,12 @@ import java.util.List;
 @Service
 public class UserService {
     private final UserStorage userStorage;
+    private final EventStorage eventStorage;
 
-    public UserService(@Qualifier("userDbStorage") UserStorage userStorage) {
+    public UserService(@Qualifier("userDbStorage") UserStorage userStorage,
+                       @Qualifier("eventDbStorage") EventStorage eventStorage) {
         this.userStorage = userStorage;
+        this.eventStorage = eventStorage;
     }
 
     public List<User> findAllUsers() {
@@ -76,12 +83,14 @@ public class UserService {
             throw new ValidationException(message);
         }
         userStorage.addToFriends(userId, friendId);
+        eventStorage.addEvent(new Event(userId, EventType.FRIEND, EventOperation.ADD, friendId));
     }
 
     public void removeFromFriends(Integer userId, Integer friendId) {
         userStorage.getById(userId);
         userStorage.getById(friendId);
         userStorage.removeFromFriends(userId, friendId);
+        eventStorage.addEvent(new Event(userId, EventType.FRIEND, EventOperation.REMOVE, friendId));
     }
 
     public List<User> findFriends(Integer id) {
@@ -91,5 +100,9 @@ public class UserService {
 
     public List<User> findCommonFriends(Integer firstId, Integer secondId) {
         return userStorage.findCommonFriends(firstId, secondId);
+    }
+
+    public List<Event> getEvents(int userId) {
+        return eventStorage.getEvents(userId);
     }
 }
