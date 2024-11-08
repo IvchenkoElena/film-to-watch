@@ -75,52 +75,16 @@ public class FilmDbStorage extends BaseRepository<Film> implements FilmStorage {
         delete(DELETE_FILM_GENRE_QUERY, newFilm.getId());
         LinkedHashSet<Genre> genres = newFilm.getGenres();
         if (genres != null) {
-            jdbc.batchUpdate(INSERT_FILM_GENRE_QUERY, new BatchPreparedStatementSetter() {
-                @Override
-                public void setValues(PreparedStatement ps, int i) throws SQLException {
-                    Genre genre = genres.stream().toList().get(i);
-                    ps.setInt(1, newFilm.getId());
-                    ps.setInt(2, genre.getId());
-                }
-
-                @Override
-                public int getBatchSize() {
-                    return genres.size();
-                }
-            });
+            saveGenres(newFilm);
         }
         delete(DELETE_FILM_DIRECTOR_QUERY, newFilm.getId());
         Set<Director> directors = newFilm.getDirectors();
         if (directors != null) {
-            jdbc.batchUpdate(INSERT_FILM_DIRECTOR_QUERY, new BatchPreparedStatementSetter() {
-                @Override
-                public void setValues(PreparedStatement ps, int i) throws SQLException {
-                    Director director = directors.stream().toList().get(i);
-                    ps.setInt(1, newFilm.getId());
-                    ps.setInt(2, director.getId());
-                }
-
-                @Override
-                public int getBatchSize() {
-                    return directors.size();
-                }
-            });
+            saveDirectors(newFilm);
         }
         Set<Integer> likes = newFilm.getLikes();
         if (likes != null) {
-            jdbc.batchUpdate(INSERT_LIKE_QUERY, new BatchPreparedStatementSetter() {
-                @Override
-                public void setValues(PreparedStatement ps, int i) throws SQLException {
-                    Integer userId = likes.stream().toList().get(i);
-                    ps.setInt(1, newFilm.getId());
-                    ps.setInt(2, userId);
-                }
-
-                @Override
-                public int getBatchSize() {
-                    return likes.size();
-                }
-            });
+            saveLikes(newFilm);
         }
         return newFilm;
     }
@@ -138,35 +102,11 @@ public class FilmDbStorage extends BaseRepository<Film> implements FilmStorage {
         newFilm.setId(id);
         LinkedHashSet<Genre> genres = newFilm.getGenres();
         if (genres != null) {
-            jdbc.batchUpdate(INSERT_FILM_GENRE_QUERY, new BatchPreparedStatementSetter() {
-                @Override
-                public void setValues(PreparedStatement ps, int i) throws SQLException {
-                    Genre genre = genres.stream().toList().get(i);
-                    ps.setInt(1, id);
-                    ps.setInt(2, genre.getId());
-                }
-
-                @Override
-                public int getBatchSize() {
-                    return genres.size();
-                }
-            });
+            saveGenres(newFilm);
         }
         Set<Director> directors = newFilm.getDirectors();
         if (directors != null) {
-            jdbc.batchUpdate(INSERT_FILM_DIRECTOR_QUERY, new BatchPreparedStatementSetter() {
-                @Override
-                public void setValues(PreparedStatement ps, int i) throws SQLException {
-                    Director director = directors.stream().toList().get(i);
-                    ps.setInt(1, id);
-                    ps.setInt(2, director.getId());
-                }
-
-                @Override
-                public int getBatchSize() {
-                    return directors.size();
-                }
-            });
+            saveDirectors(newFilm);
         }
         return newFilm;
     }
@@ -208,4 +148,57 @@ public class FilmDbStorage extends BaseRepository<Film> implements FilmStorage {
         }
         return findMany(sql, directorId);
     }
+
+    private void saveGenres(Film film) {
+        LinkedHashSet<Genre> genres = film.getGenres();
+        jdbc.batchUpdate(INSERT_FILM_GENRE_QUERY, new BatchPreparedStatementSetter() {
+            @Override
+            public void setValues(PreparedStatement ps, int i) throws SQLException {
+
+                Genre genre = genres.stream().toList().get(i);
+                ps.setInt(1, film.getId());
+                ps.setInt(2, genre.getId());
+            }
+
+            @Override
+            public int getBatchSize() {
+                return genres.size();
+            }
+        });
+    }
+
+    private void saveDirectors(Film film) {
+        Set<Director> directors = film.getDirectors();
+        jdbc.batchUpdate(INSERT_FILM_DIRECTOR_QUERY, new BatchPreparedStatementSetter() {
+            @Override
+            public void setValues(PreparedStatement ps, int i) throws SQLException {
+                Director director = directors.stream().toList().get(i);
+                ps.setInt(1, film.getId());
+                ps.setInt(2, director.getId());
+            }
+
+            @Override
+            public int getBatchSize() {
+                return directors.size();
+            }
+        });
+    }
+
+    private void saveLikes(Film film) {
+        Set<Integer> likes = film.getLikes();
+        jdbc.batchUpdate(INSERT_LIKE_QUERY, new BatchPreparedStatementSetter() {
+            @Override
+            public void setValues(PreparedStatement ps, int i) throws SQLException {
+                Integer userId = likes.stream().toList().get(i);
+                ps.setInt(1, film.getId());
+                ps.setInt(2, userId);
+            }
+
+            @Override
+            public int getBatchSize() {
+                return likes.size();
+            }
+        });
+    }
+
 }

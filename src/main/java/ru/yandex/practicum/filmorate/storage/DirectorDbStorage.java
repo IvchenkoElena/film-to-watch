@@ -74,16 +74,6 @@ public class DirectorDbStorage extends BaseRepository<Director> implements Direc
         }
     }
 
-//    public void loadDirectorsOld(List<Film> films) {
-//        final Map<Integer, Film> filmById = films.stream().collect(Collectors.toMap(Film::getId, film -> film));
-//        String inSql = String.join(",", Collections.nCopies(films.size(), "?"));
-//
-//        jdbc.query(FIND_FILM_DIRECTORS_QUERY + "(" + inSql + ")", (rs) -> {
-//            final Film film = filmById.get(rs.getInt("FILM_ID"));
-//            film.addDirector(mapper.mapRow(rs, 0));
-//        }, films.stream().map(Film::getId).toArray());
-//    }
-
     public void loadDirectors(List<Film> films) {
         final Map<Integer, Film> filmById = films.stream().collect(Collectors.toMap(Film::getId, film -> film));
         List<Integer> filmIds = films.stream().map(Film::getId).toList();
