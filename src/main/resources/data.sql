@@ -15,6 +15,10 @@ TRUNCATE TABLE genres RESTART IDENTITY;
 
 TRUNCATE TABLE rating RESTART IDENTITY;
 
+TRUNCATE TABLE reviews RESTART IDENTITY;
+
+TRUNCATE TABLE review_likes_dislikes;
+
 SET REFERENTIAL_INTEGRITY TRUE;
 
 
@@ -33,6 +37,11 @@ values (1, 'G',      'У фильма нет возрастных огранич
     (4, 'R',     'Лицам до 17 лет просматривать фильм можно только в присутствии взрослого'),  -- 4
     (5, 'NC-17', 'Лицам до 18 лет просмотр запрещён');
 
+
+INSERT INTO directors (director_name)
+VALUES ('Стивен Спилберг'),
+    ('Джеймс Кэмерон'),
+    ('Тим Бёртон');
 
 INSERT INTO FILMS (NAME , DESCRIPTION , RELEASE_DATE , DURATION , RATING_ID, LIKES_COUNT)
 VALUES ('Тень', '30-ые годы XX века, город Нью-Йорк...', '1994-07-01', 108 , 3, 2),
