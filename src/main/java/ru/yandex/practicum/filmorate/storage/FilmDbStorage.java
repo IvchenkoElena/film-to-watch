@@ -132,8 +132,18 @@ public class FilmDbStorage extends BaseRepository<Film> implements FilmStorage {
     }
 
     @Override
-    public List<Film> bestFilms(int count) {
-        return findMany(FIND_BEST_FILMS_QUERY, count);
+    public List<Film> bestFilms(int count, Integer genreId, Integer year) {
+        String query = """
+                    WITH prm AS (SELECT cast(? as integer) AS genre_id, cast(? as integer) AS p_year)
+                    SELECT distinct f.*, r.NAME AS RATING_NAME, r.DESCRIPTION AS RATING_DESCRIPTION
+                    FROM FILMS f
+                    JOIN RATING r ON f.RATING_ID = r.RATING_ID
+                    LEFT JOIN FILM_GENRE fg ON f.FILM_ID = fg.FILM_ID
+                    JOIN prm on (FG.GENRE_ID = prm.genre_id OR prm.genre_id IS NULL) AND (EXTRACT(YEAR FROM release_date) = prm.p_year OR prm.p_year IS NULL)
+                    ORDER BY f.likes_count DESC
+                    LIMIT ?
+                    """;
+        return findMany(query, genreId, year, count);
     }
 
     @Override

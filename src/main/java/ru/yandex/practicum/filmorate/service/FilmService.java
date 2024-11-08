@@ -147,8 +147,8 @@ public class FilmService {
         filmStorage.removeLike(filmId, userId, likesCount);
     }
 
-    public List<Film> bestFilms(int count) {
-        final List<Film> films = filmStorage.bestFilms(count);
+    public List<Film> bestFilms(int count, Integer genreId, Integer year) {
+        final List<Film> films = filmStorage.bestFilms(count, genreId, year);
         genreStorage.loadGenres(films);
         directorStorage.loadDirectors(films);
         return films;
@@ -160,4 +160,5 @@ public class FilmService {
         directorStorage.loadDirectors(films);
         return films;
     }
+
 }
