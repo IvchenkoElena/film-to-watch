@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Review;
@@ -15,8 +16,8 @@ import java.util.List;
 public class ReviewDbStorage extends BaseRepository<Review> implements ReviewStorage {
 
     @Autowired
-    public ReviewDbStorage(JdbcTemplate jdbc, RowMapper<Review> mapper) {
-        super(jdbc, mapper);
+    public ReviewDbStorage(JdbcTemplate jdbc, NamedParameterJdbcTemplate namedJdbcTemplate, RowMapper<Review> mapper) {
+        super(jdbc, namedJdbcTemplate, mapper);
     }
 
     @Override
