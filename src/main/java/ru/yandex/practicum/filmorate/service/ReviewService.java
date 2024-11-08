@@ -5,7 +5,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
+import ru.yandex.practicum.filmorate.model.Event;
+import ru.yandex.practicum.filmorate.model.EventOperation;
+import ru.yandex.practicum.filmorate.model.EventType;
 import ru.yandex.practicum.filmorate.model.Review;
+import ru.yandex.practicum.filmorate.storage.EventStorage;
 import ru.yandex.practicum.filmorate.storage.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.ReviewStorage;
 import ru.yandex.practicum.filmorate.storage.UserStorage;
@@ -19,18 +23,25 @@ public class ReviewService {
     private final ReviewStorage reviewStorage;
     private final UserStorage userStorage;
     private final FilmStorage filmStorage;
+    private final EventStorage eventStorage;
 
     public Review addNew(Review newReview) {
         checkCorrectReviewParams(newReview);
-        return reviewStorage.addNew(newReview);
+        Review review = reviewStorage.addNew(newReview);
+        eventStorage.addEvent(new Event(review.getUserId(), EventType.REVIEW, EventOperation.ADD, review.getReviewId()));
+        return review;
     }
 
     public Review update(Review modifiedReview) {
-        return reviewStorage.update(modifiedReview);
+        Review review = reviewStorage.update(modifiedReview);
+        eventStorage.addEvent(new Event(review.getUserId(), EventType.REVIEW, EventOperation.UPDATE, review.getReviewId()));
+        return review;
     }
 
     public void deleteById(Integer id) {
+        Review review = reviewStorage.getById(id);
         reviewStorage.deleteById(id);
+        eventStorage.addEvent(new Event(review.getUserId(), EventType.REVIEW, EventOperation.REMOVE, review.getReviewId()));
     }
 
     public Review getById(Integer id) {
