@@ -211,4 +211,29 @@ public class FilmDbStorage extends BaseRepository<Film> implements FilmStorage {
         });
     }
 
+    @Override
+    public List<Film> getCommonFilms(Integer userId, Integer friendId) {
+        String query = """
+            WITH common AS (
+                SELECT f.FILM_ID
+                FROM FILMS f
+                JOIN RATING r ON f.RATING_ID = r.RATING_ID
+                JOIN LIKES l ON f.FILM_ID = l.FILM_ID
+                WHERE l.USER_ID = ?
+                INTERSECT
+                SELECT f.FILM_ID
+                FROM FILMS f
+                JOIN RATING r ON f.RATING_ID = r.RATING_ID
+                JOIN LIKES l ON f.FILM_ID = l.FILM_ID
+                WHERE l.USER_ID = ?
+            )
+            SELECT f.*, r.NAME AS RATING_NAME, r.DESCRIPTION AS RATING_DESCRIPTION
+            FROM common c
+            JOIN FILMS f ON c.FILM_ID = f.FILM_ID
+            JOIN RATING r ON f.RATING_ID = r.RATING_ID
+            ORDER BY f.LIKES_COUNT DESC
+            """;
+        return findMany(query, userId, friendId);
+    }
+
 }
