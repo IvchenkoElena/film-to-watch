@@ -5,15 +5,9 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
-import ru.yandex.practicum.filmorate.model.Director;
-import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.model.Genre;
-import ru.yandex.practicum.filmorate.model.Mpa;
+import ru.yandex.practicum.filmorate.model.*;
+import ru.yandex.practicum.filmorate.storage.*;
 import ru.yandex.practicum.filmorate.storage.DirectorStorage;
-import ru.yandex.practicum.filmorate.storage.FilmStorage;
-import ru.yandex.practicum.filmorate.storage.GenreStorage;
-import ru.yandex.practicum.filmorate.storage.MpaStorage;
-import ru.yandex.practicum.filmorate.storage.UserStorage;
 
 import java.time.LocalDate;
 import java.util.HashSet;
@@ -27,17 +21,20 @@ public class FilmService {
     private final GenreStorage genreStorage;
     private final MpaStorage mpaStorage;
     private final DirectorStorage directorStorage;
+    private final EventStorage eventStorage;
 
     public FilmService(@Qualifier("filmDbStorage") FilmStorage filmStorage,
                        @Qualifier("userDbStorage") UserStorage userStorage,
                        @Qualifier("genreDbStorage") GenreStorage genreStorage,
                        @Qualifier("mpaDbStorage") MpaStorage mpaStorage,
-                       @Qualifier("directorDbStorage") DirectorStorage directorStorage) {
+                       @Qualifier("directorDbStorage") DirectorStorage directorStorage,
+                       @Qualifier("eventDbStorage") EventStorage eventStorage) {
         this.filmStorage = filmStorage;
         this.userStorage = userStorage;
         this.genreStorage = genreStorage;
         this.mpaStorage = mpaStorage;
         this.directorStorage = directorStorage;
+        this.eventStorage = eventStorage;
     }
 
     public List<Film> findAllFilms() {
@@ -129,6 +126,7 @@ public class FilmService {
         }
         Integer likesCount = filmStorage.getById(filmId).getLikesCount() + 1;
         filmStorage.addLike(filmId, userId, likesCount);
+        eventStorage.addEvent(new Event(userId, EventType.LIKE, EventOperation.ADD, filmId));
     }
 
     public void removeLike(Integer filmId, Integer userId) {
@@ -145,6 +143,7 @@ public class FilmService {
         }
         Integer likesCount = filmStorage.getById(filmId).getLikesCount() - 1;
         filmStorage.removeLike(filmId, userId, likesCount);
+        eventStorage.addEvent(new Event(userId, EventType.LIKE, EventOperation.REMOVE, filmId));
     }
 
     public List<Film> bestFilms(int count, Integer genreId, Integer year) {
