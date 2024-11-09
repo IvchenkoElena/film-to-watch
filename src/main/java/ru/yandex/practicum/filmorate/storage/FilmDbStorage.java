@@ -231,7 +231,7 @@ public class FilmDbStorage extends BaseRepository<Film> implements FilmStorage {
             FROM common c
             JOIN FILMS f ON c.FILM_ID = f.FILM_ID
             JOIN RATING r ON f.RATING_ID = r.RATING_ID
-            ORDER BY (SELECT COUNT(*) FROM LIKES WHERE FILM_ID = f.FILM_ID) DESC
+            ORDER BY f.LIKES_COUNT DESC
             """;
         return findMany(query, userId, friendId);
     }
