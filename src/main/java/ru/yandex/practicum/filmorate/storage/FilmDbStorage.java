@@ -237,45 +237,18 @@ public class FilmDbStorage extends BaseRepository<Film> implements FilmStorage {
     }
 
     @Override
-    public List<Film> searchFilmsByDirector(String searchQuery) {
-        String query = """
-                SELECT f.*, r.NAME AS RATING_NAME, r.DESCRIPTION AS RATING_DESCRIPTION
-                    FROM FILMS f
-                    JOIN RATING r ON f.RATING_ID = r.RATING_ID
-                    JOIN FILM_DIRECTOR fd ON f.FILM_ID=fd.FILM_ID
-                    JOIN DIRECTORS d ON fd.DIRECTOR_ID=d.DIRECTOR_ID
-                WHERE LOWER(d.DIRECTOR_NAME) LIKE LOWER(?)
-                ORDER BY f.LIKES_COUNT DESC
-                """;
-
-        return findMany(query, searchQuery);
-    }
-
-    @Override
-    public List<Film> searchFilmsByTitle(String searchQuery) {
-        String query = """
-                SELECT f.*, r.NAME AS RATING_NAME, r.DESCRIPTION AS RATING_DESCRIPTION
-                    FROM FILMS f
-                    JOIN RATING r ON f.RATING_ID = r.RATING_ID
-                WHERE LOWER(f.NAME) LIKE LOWER(?)
-                ORDER BY f.LIKES_COUNT DESC
-                """;
-
-        return findMany(query, searchQuery);
-    }
-
-    @Override
-    public List<Film> searchFilmsByAllCriteria(String searchQuery) {
+    public List<Film> searchFilms(String[] searchQueryByCriteria) {
         String query = """
                 SELECT f.*, r.NAME AS RATING_NAME, r.DESCRIPTION AS RATING_DESCRIPTION
                     FROM FILMS f
                     JOIN RATING r ON f.RATING_ID = r.RATING_ID
                     LEFT JOIN FILM_DIRECTOR fd ON f.FILM_ID=fd.FILM_ID
                     LEFT JOIN DIRECTORS d ON fd.DIRECTOR_ID=d.DIRECTOR_ID
-                WHERE LOWER(CONCAT(f.NAME, ' ', d.DIRECTOR_NAME)) LIKE LOWER(?)
+                WHERE LOWER(f.NAME) LIKE LOWER('%' || ? || '%')
+                OR LOWER(d.DIRECTOR_NAME) LIKE LOWER('%' || ? || '%')
                 ORDER BY f.LIKES_COUNT DESC
                 """;
 
-        return findMany(query, searchQuery);
+        return findMany(query, searchQueryByCriteria);
     }
 }

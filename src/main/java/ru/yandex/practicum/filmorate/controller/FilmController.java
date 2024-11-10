@@ -8,7 +8,6 @@ import ru.yandex.practicum.filmorate.service.FilmService;
 
 
 import java.util.List;
-import java.util.Set;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -83,7 +82,7 @@ public class FilmController {
 
     @GetMapping("/search")
     public List<Film> searchFilms(@RequestParam String query,
-                                  @RequestParam Set<String> by) {
+                                  @RequestParam List<String> by) {
         log.info("Поиск фильмов по запросу '{}' по критериям {}...", query, by);
         List<Film> foundFilms = filmService.searchFilms(query, by);
         log.info("Найдены фильмы {}.", foundFilms);

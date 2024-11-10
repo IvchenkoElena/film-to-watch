@@ -10,8 +10,9 @@ import ru.yandex.practicum.filmorate.storage.*;
 
 import java.time.LocalDate;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Set;
+import java.util.Map;
 
 @Slf4j
 @Service
@@ -167,9 +168,8 @@ public class FilmService {
         return films;
     }
 
-    public List<Film> searchFilms(String searchQuery, Set<String> searchBy) {
-        String formattedQuery = "%" + searchQuery + "%";
-        List<Film> foundFilms = searchFilmsByCriteria(formattedQuery, searchBy);
+    public List<Film> searchFilms(String searchQuery, List<String> searchBy) {
+        List<Film> foundFilms = searchFilmsByCriteria(searchQuery, searchBy);
 
         if (!foundFilms.isEmpty()) {
             loadAdditionalFilmData(foundFilms);
@@ -178,16 +178,20 @@ public class FilmService {
         return foundFilms;
     }
 
-    private List<Film> searchFilmsByCriteria(String searchQuery, Set<String> searchBy) {
-        if (searchBy.contains("director") && searchBy.contains("title")) {
-            return filmStorage.searchFilmsByAllCriteria(searchQuery);
-        } else if (searchBy.contains("director")) {
-            return filmStorage.searchFilmsByDirector(searchQuery);
-        } else if (searchBy.contains("title")) {
-            return filmStorage.searchFilmsByTitle(searchQuery);
-        } else {
-            throw new ValidationException("Заданы некорректные критерии поиска");
-        }
+    private List<Film> searchFilmsByCriteria(String searchQuery, List<String> searchBy) {
+        Map<String, String> controlCriteria = new LinkedHashMap<>();
+        controlCriteria.put("title", null);
+        controlCriteria.put("director", null);
+
+        searchBy.forEach(inputCriteria -> {
+            if (!controlCriteria.containsKey(inputCriteria)) {
+                throw new ValidationException("Задан неверный критерий поиска '%s'".formatted(inputCriteria));
+            }
+
+            controlCriteria.put(inputCriteria, searchQuery);
+        });
+
+        return filmStorage.searchFilms(controlCriteria.values().toArray(new String[0]));
     }
 
     private void loadAdditionalFilmData(List<Film> films) {
