@@ -214,26 +214,52 @@ public class FilmDbStorage extends BaseRepository<Film> implements FilmStorage {
     @Override
     public List<Film> getCommonFilms(Integer userId, Integer friendId) {
         String query = """
-                WITH common AS (
-                    SELECT f.FILM_ID
-                    FROM FILMS f
-                    JOIN RATING r ON f.RATING_ID = r.RATING_ID
-                    JOIN LIKES l ON f.FILM_ID = l.FILM_ID
-                    WHERE l.USER_ID = ?
-                    INTERSECT
-                    SELECT f.FILM_ID
-                    FROM FILMS f
-                    JOIN RATING r ON f.RATING_ID = r.RATING_ID
-                    JOIN LIKES l ON f.FILM_ID = l.FILM_ID
-                    WHERE l.USER_ID = ?
-                )
-                SELECT f.*, r.NAME AS RATING_NAME, r.DESCRIPTION AS RATING_DESCRIPTION
-                FROM common c
-                JOIN FILMS f ON c.FILM_ID = f.FILM_ID
+            WITH common AS (
+                SELECT f.FILM_ID
+                FROM FILMS f
                 JOIN RATING r ON f.RATING_ID = r.RATING_ID
-                ORDER BY f.LIKES_COUNT DESC
-                """;
+                JOIN LIKES l ON f.FILM_ID = l.FILM_ID
+                WHERE l.USER_ID = ?
+                INTERSECT
+                SELECT f.FILM_ID
+                FROM FILMS f
+                JOIN RATING r ON f.RATING_ID = r.RATING_ID
+                JOIN LIKES l ON f.FILM_ID = l.FILM_ID
+                WHERE l.USER_ID = ?
+            )
+            SELECT f.*, r.NAME AS RATING_NAME, r.DESCRIPTION AS RATING_DESCRIPTION
+            FROM common c
+            JOIN FILMS f ON c.FILM_ID = f.FILM_ID
+            JOIN RATING r ON f.RATING_ID = r.RATING_ID
+            ORDER BY f.LIKES_COUNT DESC
+            """;
         return findMany(query, userId, friendId);
+    }
+
+    @Override
+    public List<Film> getRecommendedFilms(Integer userId) {
+        String query = """
+            WITH best_match as (
+                   SELECT origin_user.USER_ID origin_user_id, l1.USER_ID found_user_id
+                   FROM users u
+                   JOIN likes l1 ON u.user_id = l1.user_id
+                   JOIN USERS origin_user ON origin_user.user_id = ?
+                   JOIN likes l2 ON l1.film_id = l2.film_id AND l2.user_id = origin_user.USER_ID
+                   WHERE u.user_id != origin_user.USER_ID
+                   GROUP BY origin_user_id, found_user_id
+                   ORDER BY COUNT(*) DESC
+                   LIMIT 1
+                 )
+                 SELECT f.*, r.NAME AS RATING_NAME, r.DESCRIPTION AS RATING_DESCRIPTION
+                 FROM best_match
+                 JOIN likes l1 ON best_match.found_user_id = l1.user_id
+                 JOIN FILMS f ON l1.FILM_ID = f.FILM_ID
+                 JOIN RATING r ON f.RATING_ID = r.RATING_ID
+                 LEFT JOIN likes l2 ON l1.FILM_ID = l2.FILM_ID AND l2.user_id = best_match.origin_user_id
+                 WHERE l2.FILM_ID IS NULL
+            """;
+
+        return findMany(query, userId);
     }
 
     @Override
