@@ -7,11 +7,12 @@ import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.*;
 import ru.yandex.practicum.filmorate.storage.*;
-import ru.yandex.practicum.filmorate.storage.DirectorStorage;
 
 import java.time.LocalDate;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 @Slf4j
 @Service
@@ -165,5 +166,36 @@ public class FilmService {
         genreStorage.loadGenres(films);
         directorStorage.loadDirectors(films);
         return films;
+    }
+
+    public List<Film> searchFilms(String searchQuery, List<String> searchBy) {
+        List<Film> foundFilms = searchFilmsByCriteria(searchQuery, searchBy);
+
+        if (!foundFilms.isEmpty()) {
+            loadAdditionalFilmData(foundFilms);
+        }
+
+        return foundFilms;
+    }
+
+    private List<Film> searchFilmsByCriteria(String searchQuery, List<String> searchBy) {
+        Map<String, String> controlCriteria = new LinkedHashMap<>();
+        controlCriteria.put("title", null);
+        controlCriteria.put("director", null);
+
+        searchBy.forEach(inputCriteria -> {
+            if (!controlCriteria.containsKey(inputCriteria)) {
+                throw new ValidationException("Задан неверный критерий поиска '%s'".formatted(inputCriteria));
+            }
+
+            controlCriteria.put(inputCriteria, searchQuery);
+        });
+
+        return filmStorage.searchFilms(controlCriteria.values().toArray(new String[0]));
+    }
+
+    private void loadAdditionalFilmData(List<Film> films) {
+        genreStorage.loadGenres(films);
+        directorStorage.loadDirectors(films);
     }
 }
