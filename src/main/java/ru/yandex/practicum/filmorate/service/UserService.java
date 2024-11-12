@@ -4,12 +4,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
-import ru.yandex.practicum.filmorate.model.Event;
-import ru.yandex.practicum.filmorate.model.EventOperation;
-import ru.yandex.practicum.filmorate.model.EventType;
-import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.storage.EventStorage;
-import ru.yandex.practicum.filmorate.storage.UserStorage;
+import ru.yandex.practicum.filmorate.model.*;
+import ru.yandex.practicum.filmorate.storage.*;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -19,11 +15,20 @@ import java.util.List;
 public class UserService {
     private final UserStorage userStorage;
     private final EventStorage eventStorage;
+    private final FilmStorage filmStorage;
+    private final GenreDbStorage genreStorage;
+    private final DirectorStorage directorStorage;
 
     public UserService(@Qualifier("userDbStorage") UserStorage userStorage,
-                       @Qualifier("eventDbStorage") EventStorage eventStorage) {
+                       @Qualifier("eventDbStorage") EventStorage eventStorage,
+                       @Qualifier("filmDbStorage") FilmStorage filmStorage,
+                       @Qualifier("genreDbStorage")GenreDbStorage genreStorage,
+                       @Qualifier("directorDbStorage")DirectorStorage directorStorage) {
         this.userStorage = userStorage;
         this.eventStorage = eventStorage;
+        this.filmStorage = filmStorage;
+        this.genreStorage = genreStorage;
+        this.directorStorage = directorStorage;
     }
 
     public List<User> findAllUsers() {
@@ -104,5 +109,15 @@ public class UserService {
 
     public List<Event> getEvents(int userId) {
         return eventStorage.getEvents(userId);
+    }
+
+    public List<Film> getRecommendedFilms(Integer userId) {
+        userStorage.getById(userId);
+
+        List<Film> recommendedFilms = filmStorage.getRecommendedFilms(userId);
+        genreStorage.loadGenres(recommendedFilms);
+        directorStorage.loadDirectors(recommendedFilms);
+
+        return recommendedFilms;
     }
 }
