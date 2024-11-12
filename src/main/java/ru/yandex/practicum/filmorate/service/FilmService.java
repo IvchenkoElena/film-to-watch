@@ -41,15 +41,13 @@ public class FilmService {
 
     public List<Film> findAllFilms() {
         final List<Film> films = filmStorage.findAll();
-        genreStorage.loadGenres(films);
-        directorStorage.loadDirectors(films);
+        loadAdditionalFilmData(films);
         return films;
     }
 
     public Film findById(Integer filmId) {
         Film film = filmStorage.getById(filmId);
-        genreStorage.loadGenres(List.of(film));
-        directorStorage.loadDirectors(List.of(film));
+        loadAdditionalFilmData(List.of(film));
         return film;
     }
 
@@ -121,11 +119,6 @@ public class FilmService {
             log.error(message);
             throw new NotFoundException(message);
         }
-        if (filmStorage.getById(filmId).getLikes().contains(userId)) {
-            String message = "Пользователь уже оценил этот фильм ранее";
-            log.error(message);
-            throw new ValidationException(message);
-        }
 
         filmStorage.addLike(filmId, userId);
         eventStorage.addEvent(new Event(userId, EventType.LIKE, EventOperation.ADD, filmId));
@@ -150,8 +143,7 @@ public class FilmService {
 
     public List<Film> bestFilms(int count, Integer genreId, Integer year) {
         final List<Film> films = filmStorage.bestFilms(count, genreId, year);
-        genreStorage.loadGenres(films);
-        directorStorage.loadDirectors(films);
+        loadAdditionalFilmData(films);
         return films;
     }
 
@@ -162,15 +154,13 @@ public class FilmService {
             throw new NotFoundException(message);
         }
         final List<Film> films = filmStorage.findFilmsByDirector(directorId, sortBy);
-        genreStorage.loadGenres(films);
-        directorStorage.loadDirectors(films);
+        loadAdditionalFilmData(films);
         return films;
     }
 
     public List<Film> getCommonFilms(Integer userId, Integer friendId) {
         final List<Film> films = filmStorage.getCommonFilms(userId, friendId);
-        genreStorage.loadGenres(films);
-        directorStorage.loadDirectors(films);
+        loadAdditionalFilmData(films);
         return films;
     }
 
@@ -203,5 +193,6 @@ public class FilmService {
     private void loadAdditionalFilmData(List<Film> films) {
         genreStorage.loadGenres(films);
         directorStorage.loadDirectors(films);
+        filmStorage.loadLikes(films);
     }
 }
