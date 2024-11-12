@@ -16,9 +16,9 @@ public interface FilmStorage {
 
     void removeFilm(Integer filmId);
 
-    void addLike(Integer filmId, Integer userId, Integer likesCount);
+    void addLike(Integer filmId, Integer userId);
 
-    void removeLike(Integer filmId, Integer userId, Integer likesCount);
+    void removeLike(Integer filmId, Integer userId);
 
     List<Film> bestFilms(int count, Integer genreId, Integer year);
 

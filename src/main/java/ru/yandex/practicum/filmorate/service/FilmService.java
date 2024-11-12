@@ -126,9 +126,9 @@ public class FilmService {
             log.error(message);
             throw new ValidationException(message);
         }
-        Integer likesCount = filmStorage.getById(filmId).getLikesCount() + 1;
+
+        filmStorage.addLike(filmId, userId);
         eventStorage.addEvent(new Event(userId, EventType.LIKE, EventOperation.ADD, filmId));
-        filmStorage.addLike(filmId, userId, likesCount);
     }
 
     public void removeLike(Integer filmId, Integer userId) {
@@ -144,7 +144,7 @@ public class FilmService {
             throw new NotFoundException(message);
         }
         Integer likesCount = filmStorage.getById(filmId).getLikesCount() - 1;
-        filmStorage.removeLike(filmId, userId, likesCount);
+        filmStorage.removeLike(filmId, userId);
         eventStorage.addEvent(new Event(userId, EventType.LIKE, EventOperation.REMOVE, filmId));
     }
 
