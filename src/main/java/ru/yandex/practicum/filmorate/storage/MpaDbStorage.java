@@ -37,5 +37,4 @@ public class MpaDbStorage extends BaseRepository<Mpa> implements MpaStorage {
         return findOne(FIND_BY_FILM_ID_QUERY, filmId)
                 .orElseThrow(() -> new NotFoundException(String.format("Рейтинг фильма c ID %d не найден", filmId)));
     }
-
 }

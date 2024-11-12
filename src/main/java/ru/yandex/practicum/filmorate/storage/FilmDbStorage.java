@@ -38,7 +38,6 @@ public class FilmDbStorage extends BaseRepository<Film> implements FilmStorage {
     private static final String DELETE_FILM_DIRECTOR_QUERY = "DELETE FROM film_director WHERE film_id = ?";
     private static final String FIND_ALL_QUERY = "SELECT f.*, r.NAME AS RATING_NAME, r.DESCRIPTION AS RATING_DESCRIPTION, FROM FILMS f JOIN RATING r ON f.RATING_ID = r.RATING_ID";
     private static final String FIND_BY_ID_QUERY = FIND_ALL_QUERY + " WHERE f.FILM_ID = ?";
-    private static final String FIND_BEST_FILMS_QUERY = FIND_ALL_QUERY + " ORDER BY f.likes_count DESC LIMIT ?";
     private static final String FIND_DIRECTOR_FILMS_SORTED_BY_YEARS_QUERY = FIND_ALL_QUERY + " inner join film_director fd on f.film_id = fd.film_id where fd.director_id = ? ORDER BY extract(year from f.release_date)";
     private static final String FIND_DIRECTOR_FILMS_SORTED_BY_LIKES_QUERY = FIND_ALL_QUERY + " inner join film_director fd on f.film_id = fd.film_id where fd.director_id = ? ORDER BY f.likes_count DESC";
 
