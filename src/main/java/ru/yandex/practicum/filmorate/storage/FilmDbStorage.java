@@ -25,12 +25,17 @@ import java.util.Set;
 @Primary
 public class FilmDbStorage extends BaseRepository<Film> implements FilmStorage {
 
-    private static final String UPDATE_FILM_QUERY = "UPDATE FILMS SET NAME = ?, DESCRIPTION = ?, RELEASE_DATE = ?, DURATION = ?, RATING_ID = ?, LIKES_COUNT = ?" +
-            "WHERE FILM_ID = ?";
+    private static final String UPDATE_FILM_QUERY = "UPDATE FILMS SET NAME = ?, DESCRIPTION = ?, RELEASE_DATE = ?, DURATION = ?, RATING_ID = ?" +
+                                                    "WHERE FILM_ID = ?";
+    private static final String GET_LIKES_COUNT_QUERY = """
+             SELECT SUM(user_id)
+             FROM LIKES
+             WHERE film_id = ?
+            """;
     private static final String UPDATE_LIKES_COUNT_QUERY = "UPDATE FILMS SET LIKES_COUNT = ? WHERE FILM_ID = ?";
     private static final String INSERT_QUERY = "INSERT INTO FILMS(NAME, DESCRIPTION, RELEASE_DATE, DURATION, RATING_ID) VALUES(?, ?, ?, ?, ?)";
     private static final String DELETE_FILM_QUERY = "DELETE FROM films WHERE film_id = ?";
-    private static final String INSERT_LIKE_QUERY = "INSERT INTO likes(film_id, user_id) VALUES(?, ?)";
+    private static final String INSERT_LIKE_QUERY = "MERGE INTO likes(film_id, user_id) KEY(film_id, user_id) VALUES(?, ?)";
     private static final String DELETE_LIKE_QUERY = "DELETE FROM LIKES WHERE FILM_ID = ? AND USER_ID = ?";
     private static final String INSERT_FILM_GENRE_QUERY = "INSERT INTO film_genre(FILM_ID, GENRE_ID) VALUES(?, ?)";
     private static final String DELETE_FILM_GENRE_QUERY = "DELETE FROM film_genre WHERE FILM_ID = ?";
@@ -68,7 +73,6 @@ public class FilmDbStorage extends BaseRepository<Film> implements FilmStorage {
                 newFilm.getReleaseDate(),
                 newFilm.getDuration(),
                 newFilm.getMpa().getId(),
-                newFilm.getLikes().size(),
                 newFilm.getId()
         );
         delete(DELETE_FILM_GENRE_QUERY, newFilm.getId());
@@ -119,15 +123,15 @@ public class FilmDbStorage extends BaseRepository<Film> implements FilmStorage {
     }
 
     @Override
-    public void addLike(Integer filmId, Integer userId, Integer likesCount) {
+    public void addLike(Integer filmId, Integer userId) {
         update(INSERT_LIKE_QUERY, filmId, userId);
-        update(UPDATE_LIKES_COUNT_QUERY, likesCount, filmId);
+        updateLikesCountByFilmId(filmId);
     }
 
     @Override
-    public void removeLike(Integer filmId, Integer userId, Integer likesCount) {
+    public void removeLike(Integer filmId, Integer userId) {
         delete(DELETE_LIKE_QUERY, filmId, userId);
-        update(UPDATE_LIKES_COUNT_QUERY, likesCount, filmId);
+        updateLikesCountByFilmId(filmId);
     }
 
     @Override
@@ -213,50 +217,50 @@ public class FilmDbStorage extends BaseRepository<Film> implements FilmStorage {
     @Override
     public List<Film> getCommonFilms(Integer userId, Integer friendId) {
         String query = """
-            WITH common AS (
-                SELECT f.FILM_ID
-                FROM FILMS f
+                WITH common AS (
+                    SELECT f.FILM_ID
+                    FROM FILMS f
+                    JOIN RATING r ON f.RATING_ID = r.RATING_ID
+                    JOIN LIKES l ON f.FILM_ID = l.FILM_ID
+                    WHERE l.USER_ID = ?
+                    INTERSECT
+                    SELECT f.FILM_ID
+                    FROM FILMS f
+                    JOIN RATING r ON f.RATING_ID = r.RATING_ID
+                    JOIN LIKES l ON f.FILM_ID = l.FILM_ID
+                    WHERE l.USER_ID = ?
+                )
+                SELECT f.*, r.NAME AS RATING_NAME, r.DESCRIPTION AS RATING_DESCRIPTION
+                FROM common c
+                JOIN FILMS f ON c.FILM_ID = f.FILM_ID
                 JOIN RATING r ON f.RATING_ID = r.RATING_ID
-                JOIN LIKES l ON f.FILM_ID = l.FILM_ID
-                WHERE l.USER_ID = ?
-                INTERSECT
-                SELECT f.FILM_ID
-                FROM FILMS f
-                JOIN RATING r ON f.RATING_ID = r.RATING_ID
-                JOIN LIKES l ON f.FILM_ID = l.FILM_ID
-                WHERE l.USER_ID = ?
-            )
-            SELECT f.*, r.NAME AS RATING_NAME, r.DESCRIPTION AS RATING_DESCRIPTION
-            FROM common c
-            JOIN FILMS f ON c.FILM_ID = f.FILM_ID
-            JOIN RATING r ON f.RATING_ID = r.RATING_ID
-            ORDER BY f.LIKES_COUNT DESC
-            """;
+                ORDER BY f.LIKES_COUNT DESC
+                """;
         return findMany(query, userId, friendId);
     }
 
     @Override
     public List<Film> getRecommendedFilms(Integer userId) {
         String query = """
-            WITH best_match as (
-                   SELECT origin_user.USER_ID origin_user_id, l1.USER_ID found_user_id
-                   FROM users u
-                   JOIN likes l1 ON u.user_id = l1.user_id
-                   JOIN USERS origin_user ON origin_user.user_id = ?
-                   JOIN likes l2 ON l1.film_id = l2.film_id AND l2.user_id = origin_user.USER_ID
-                   WHERE u.user_id != origin_user.USER_ID
-                   GROUP BY origin_user_id, found_user_id
-                   ORDER BY COUNT(*) DESC
-                   LIMIT 1
-                 )
-                 SELECT f.*, r.NAME AS RATING_NAME, r.DESCRIPTION AS RATING_DESCRIPTION
-                 FROM best_match
-                 JOIN likes l1 ON best_match.found_user_id = l1.user_id
-                 JOIN FILMS f ON l1.FILM_ID = f.FILM_ID
-                 JOIN RATING r ON f.RATING_ID = r.RATING_ID
-                 LEFT JOIN likes l2 ON l1.FILM_ID = l2.FILM_ID AND l2.user_id = best_match.origin_user_id
-                 WHERE l2.FILM_ID IS NULL
-            """;
+                WITH best_match as (
+                       SELECT origin_user.USER_ID origin_user_id, l1.USER_ID found_user_id
+                       FROM users u
+                       JOIN likes l1 ON u.user_id = l1.user_id
+                       JOIN USERS origin_user ON origin_user.user_id = ?
+                       JOIN likes l2 ON l1.film_id = l2.film_id AND l2.user_id = origin_user.USER_ID
+                       WHERE u.user_id != origin_user.USER_ID
+                       GROUP BY origin_user_id, found_user_id
+                       ORDER BY COUNT(*) DESC
+                       LIMIT 1
+                     )
+                     SELECT f.*, r.NAME AS RATING_NAME, r.DESCRIPTION AS RATING_DESCRIPTION
+                     FROM best_match
+                     JOIN likes l1 ON best_match.found_user_id = l1.user_id
+                     JOIN FILMS f ON l1.FILM_ID = f.FILM_ID
+                     JOIN RATING r ON f.RATING_ID = r.RATING_ID
+                     LEFT JOIN likes l2 ON l1.FILM_ID = l2.FILM_ID AND l2.user_id = best_match.origin_user_id
+                     WHERE l2.FILM_ID IS NULL
+                """;
 
         return findMany(query, userId);
     }
@@ -275,5 +279,14 @@ public class FilmDbStorage extends BaseRepository<Film> implements FilmStorage {
                 """;
 
         return findMany(query, searchQueryByCriteria);
+    }
+
+    private Integer updateLikesCountByFilmId(Integer filmId) {
+        Integer likesCount = jdbc.queryForObject(GET_LIKES_COUNT_QUERY, Integer.class, filmId);
+        if (likesCount == null) {
+            likesCount = 0;
+        }
+        update(UPDATE_LIKES_COUNT_QUERY, likesCount, filmId);
+        return likesCount;
     }
 }
