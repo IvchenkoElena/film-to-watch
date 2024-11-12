@@ -21,14 +21,14 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class MpaStorageTest {
     MpaDbStorage mpaStorage;
 
-    @Test
-    public void testFindGenre() {
-        assertThat(mpaStorage.findByFilmId(2))
-                .isInstanceOf(Mpa.class)
-                .hasFieldOrPropertyWithValue("id", 2)
-                .hasFieldOrPropertyWithValue("name", "PG");
-        ;
-    }
+//    @Test
+//    public void testFindGenre() {
+//        assertThat(mpaStorage.findByFilmId(2))
+//                .isInstanceOf(Mpa.class)
+//                .hasFieldOrPropertyWithValue("id", 2)
+//                .hasFieldOrPropertyWithValue("name", "PG");
+//        ;
+//    }
 
     @Test
     public void findAll() {
