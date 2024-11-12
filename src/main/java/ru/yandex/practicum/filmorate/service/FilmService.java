@@ -156,6 +156,11 @@ public class FilmService {
     }
 
     public List<Film> findFilmsByDirector(Integer directorId, String sortBy) {
+        if (directorStorage.findDirectorById(directorId) == null) {
+            String message = "Режиссер с id = " + directorId + " не найден";
+            log.error(message);
+            throw new NotFoundException(message);
+        }
         final List<Film> films = filmStorage.findFilmsByDirector(directorId, sortBy);
         genreStorage.loadGenres(films);
         directorStorage.loadDirectors(films);

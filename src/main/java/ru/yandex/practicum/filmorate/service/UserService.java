@@ -3,6 +3,7 @@ package ru.yandex.practicum.filmorate.service;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
+import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.*;
 import ru.yandex.practicum.filmorate.storage.*;
@@ -108,6 +109,10 @@ public class UserService {
     }
 
     public List<Event> getEvents(int userId) {
+        if (userStorage.getById(userId) == null) {
+            String message = "Пользователь с ID " + userId + " не найден";
+            throw new NotFoundException(message);
+        }
         return eventStorage.getEvents(userId);
     }
 
