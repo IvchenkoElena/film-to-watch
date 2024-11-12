@@ -127,8 +127,8 @@ public class FilmService {
             throw new ValidationException(message);
         }
         Integer likesCount = filmStorage.getById(filmId).getLikesCount() + 1;
-        filmStorage.addLike(filmId, userId, likesCount);
         eventStorage.addEvent(new Event(userId, EventType.LIKE, EventOperation.ADD, filmId));
+        filmStorage.addLike(filmId, userId, likesCount);
     }
 
     public void removeLike(Integer filmId, Integer userId) {
