@@ -16,9 +16,12 @@ import ru.yandex.practicum.filmorate.model.Genre;
 
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 
 @Repository("filmDbStorage")
@@ -45,7 +48,7 @@ public class FilmDbStorage extends BaseRepository<Film> implements FilmStorage {
     private static final String FIND_BY_ID_QUERY = FIND_ALL_QUERY + " WHERE f.FILM_ID = ?";
     private static final String FIND_DIRECTOR_FILMS_SORTED_BY_YEARS_QUERY = FIND_ALL_QUERY + " inner join film_director fd on f.film_id = fd.film_id where fd.director_id = ? ORDER BY extract(year from f.release_date)";
     private static final String FIND_DIRECTOR_FILMS_SORTED_BY_LIKES_QUERY = FIND_ALL_QUERY + " inner join film_director fd on f.film_id = fd.film_id where fd.director_id = ? ORDER BY f.likes_count DESC";
-
+    private static final String FIND_FILM_LIKES_QUERY = "SELECT * FROM likes WHERE film_id IN";
 
     // Инициализируем репозиторий
     @Autowired
@@ -288,5 +291,16 @@ public class FilmDbStorage extends BaseRepository<Film> implements FilmStorage {
         }
         update(UPDATE_LIKES_COUNT_QUERY, likesCount, filmId);
         return likesCount;
+    }
+
+    @Override
+    public void loadLikes(List<Film> films) {
+        final Map<Integer, Film> filmById = films.stream().collect(Collectors.toMap(Film::getId, film -> film));
+        String inSql = String.join(",", Collections.nCopies(films.size(), "?"));
+
+        jdbc.query(FIND_FILM_LIKES_QUERY + "(" + inSql + ")", (rs) -> {
+            final Film film = filmById.get(rs.getInt("FILM_ID"));
+            film.addLike(rs.getInt("USER_ID"));
+        }, films.stream().map(Film::getId).toArray());
     }
 }
