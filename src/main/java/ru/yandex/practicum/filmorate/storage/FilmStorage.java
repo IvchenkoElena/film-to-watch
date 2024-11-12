@@ -29,4 +29,6 @@ public interface FilmStorage {
     List<Film> getRecommendedFilms(Integer userId);
 
     List<Film> searchFilms(String[] searchQueryByCriteria);
+
+    void loadLikes(List<Film> films);
 }

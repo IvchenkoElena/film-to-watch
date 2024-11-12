@@ -40,4 +40,9 @@ public class Film {
     public void addDirector(Director director) {
         getDirectors().add(director);
     }
+
+    public void addLike(Integer userId) {
+        getLikes().add(userId);
+
+    }
 }

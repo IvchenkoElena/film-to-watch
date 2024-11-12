@@ -3,6 +3,7 @@ package ru.yandex.practicum.filmorate.service;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
+import ru.yandex.practicum.filmorate.exception.AlreadyExistsException;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.*;
@@ -41,15 +42,13 @@ public class FilmService {
 
     public List<Film> findAllFilms() {
         final List<Film> films = filmStorage.findAll();
-        genreStorage.loadGenres(films);
-        directorStorage.loadDirectors(films);
+        loadAdditionalFilmData(films);
         return films;
     }
 
     public Film findById(Integer filmId) {
         Film film = filmStorage.getById(filmId);
-        genreStorage.loadGenres(List.of(film));
-        directorStorage.loadDirectors(List.of(film));
+        loadAdditionalFilmData(List.of(film));
         return film;
     }
 
@@ -121,13 +120,16 @@ public class FilmService {
             log.error(message);
             throw new NotFoundException(message);
         }
-        if (filmStorage.getById(filmId).getLikes().contains(userId)) {
+        eventStorage.addEvent(new Event(userId, EventType.LIKE, EventOperation.ADD, filmId));
+        Film film = filmStorage.getById(filmId);
+        loadAdditionalFilmData(List.of(film));
+        if (film.getLikes().contains(userId)) {
             String message = "Пользователь уже оценил этот фильм ранее";
             log.error(message);
-            throw new ValidationException(message);
+            throw new AlreadyExistsException(message);
         }
         Integer likesCount = filmStorage.getById(filmId).getLikesCount() + 1;
-        eventStorage.addEvent(new Event(userId, EventType.LIKE, EventOperation.ADD, filmId));
+
         filmStorage.addLike(filmId, userId, likesCount);
     }
 
@@ -150,8 +152,7 @@ public class FilmService {
 
     public List<Film> bestFilms(int count, Integer genreId, Integer year) {
         final List<Film> films = filmStorage.bestFilms(count, genreId, year);
-        genreStorage.loadGenres(films);
-        directorStorage.loadDirectors(films);
+        loadAdditionalFilmData(films);
         return films;
     }
 
@@ -162,15 +163,13 @@ public class FilmService {
             throw new NotFoundException(message);
         }
         final List<Film> films = filmStorage.findFilmsByDirector(directorId, sortBy);
-        genreStorage.loadGenres(films);
-        directorStorage.loadDirectors(films);
+        loadAdditionalFilmData(films);
         return films;
     }
 
     public List<Film> getCommonFilms(Integer userId, Integer friendId) {
         final List<Film> films = filmStorage.getCommonFilms(userId, friendId);
-        genreStorage.loadGenres(films);
-        directorStorage.loadDirectors(films);
+        loadAdditionalFilmData(films);
         return films;
     }
 
@@ -203,5 +202,6 @@ public class FilmService {
     private void loadAdditionalFilmData(List<Film> films) {
         genreStorage.loadGenres(films);
         directorStorage.loadDirectors(films);
+        filmStorage.loadLikes(films);
     }
 }
