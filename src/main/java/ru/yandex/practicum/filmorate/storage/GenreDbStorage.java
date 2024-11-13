@@ -1,7 +1,6 @@
 package ru.yandex.practicum.filmorate.storage;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Primary;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
@@ -19,7 +18,6 @@ import java.util.stream.Collectors;
 
 
 @Repository("genreDbStorage")
-@Primary
 public class GenreDbStorage extends BaseRepository<Genre> implements GenreStorage {
     private static final String FIND_ALL_QUERY = "SELECT * FROM GENRES";
     private static final String FIND_BY_ID_QUERY = "SELECT * FROM GENRES WHERE GENRE_ID = ?";

@@ -1,6 +1,5 @@
 package ru.yandex.practicum.filmorate.storage;
 
-import org.springframework.context.annotation.Primary;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
@@ -10,7 +9,6 @@ import ru.yandex.practicum.filmorate.model.Event;
 import java.util.List;
 
 @Repository("eventDbStorage")
-@Primary
 public class EventDbStorage extends BaseRepository<Event> implements EventStorage {
     public EventDbStorage(JdbcTemplate jdbc, NamedParameterJdbcTemplate namedJdbcTemplate, RowMapper<Event> mapper) {
         super(jdbc, namedJdbcTemplate, mapper);

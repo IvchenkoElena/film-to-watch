@@ -2,7 +2,6 @@ package ru.yandex.practicum.filmorate.storage;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Primary;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
@@ -20,7 +19,6 @@ import java.util.stream.Collectors;
 
 @Slf4j
 @Repository("directorDbStorage")
-@Primary
 public class DirectorDbStorage extends BaseRepository<Director> implements DirectorStorage {
     private static final String FIND_ALL_DIRECTORS_QUERY = "SELECT * FROM directors";
     private static final String FIND_DIRECTOR_BY_ID = "SELECT * FROM directors WHERE director_id = ?";
