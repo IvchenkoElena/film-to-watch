@@ -7,7 +7,6 @@ import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.*;
 import ru.yandex.practicum.filmorate.storage.*;
-import ru.yandex.practicum.filmorate.storage.DirectorStorage;
 
 import java.time.LocalDate;
 import java.util.HashSet;
@@ -119,7 +118,6 @@ public class FilmService {
             log.error(message);
             throw new NotFoundException(message);
         }
-
         filmStorage.addLike(filmId, userId);
         eventStorage.addEvent(new Event(userId, EventType.LIKE, EventOperation.ADD, filmId));
     }

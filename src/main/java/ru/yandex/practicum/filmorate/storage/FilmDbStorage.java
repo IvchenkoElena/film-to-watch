@@ -5,7 +5,9 @@ import org.springframework.context.annotation.Primary;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
+import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.stereotype.Repository;
 import org.springframework.web.bind.annotation.RequestBody;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
@@ -16,7 +18,6 @@ import ru.yandex.practicum.filmorate.model.Genre;
 
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -29,7 +30,7 @@ import java.util.stream.Collectors;
 public class FilmDbStorage extends BaseRepository<Film> implements FilmStorage {
 
     private static final String UPDATE_FILM_QUERY = "UPDATE FILMS SET NAME = ?, DESCRIPTION = ?, RELEASE_DATE = ?, DURATION = ?, RATING_ID = ?" +
-                                                    "WHERE FILM_ID = ?";
+            "WHERE FILM_ID = ?";
     private static final String GET_LIKES_COUNT_QUERY = """
              SELECT SUM(user_id)
              FROM LIKES
@@ -296,11 +297,12 @@ public class FilmDbStorage extends BaseRepository<Film> implements FilmStorage {
     @Override
     public void loadLikes(List<Film> films) {
         final Map<Integer, Film> filmById = films.stream().collect(Collectors.toMap(Film::getId, film -> film));
-        String inSql = String.join(",", Collections.nCopies(films.size(), "?"));
+        List<Integer> filmIds = films.stream().map(Film::getId).toList();
+        SqlParameterSource parameters = new MapSqlParameterSource("filmIds", filmIds);
 
-        jdbc.query(FIND_FILM_LIKES_QUERY + "(" + inSql + ")", (rs) -> {
+        namedJdbcTemplate.query(FIND_FILM_LIKES_QUERY + "(:filmIds)", parameters, (rs) -> {
             final Film film = filmById.get(rs.getInt("FILM_ID"));
             film.addLike(rs.getInt("USER_ID"));
-        }, films.stream().map(Film::getId).toArray());
+        });
     }
 }
