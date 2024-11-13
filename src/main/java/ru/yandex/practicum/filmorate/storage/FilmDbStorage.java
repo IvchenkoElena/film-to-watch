@@ -11,8 +11,8 @@ import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.stereotype.Repository;
 import org.springframework.web.bind.annotation.RequestBody;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
-import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Director;
+import ru.yandex.practicum.filmorate.model.DirectorSortOrderType;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 
@@ -154,15 +154,11 @@ public class FilmDbStorage extends BaseRepository<Film> implements FilmStorage {
     }
 
     @Override
-    public List<Film> findFilmsByDirector(Integer directorId, String sortBy) {
-        String sql;
-        if (sortBy.equals("year")) {
-            sql = FIND_DIRECTOR_FILMS_SORTED_BY_YEARS_QUERY;
-        } else if (sortBy.equals("likes")) {
-            sql = FIND_DIRECTOR_FILMS_SORTED_BY_LIKES_QUERY;
-        } else {
-            throw new ValidationException("Некорректный параметр сортировки");
-        }
+    public List<Film> findFilmsByDirector(Integer directorId, DirectorSortOrderType directorSortOrderType) {
+        String sql = switch (directorSortOrderType) {
+            case YEAR -> FIND_DIRECTOR_FILMS_SORTED_BY_YEARS_QUERY;
+            case LIKES -> FIND_DIRECTOR_FILMS_SORTED_BY_LIKES_QUERY;
+        };
         return findMany(sql, directorId);
     }
 

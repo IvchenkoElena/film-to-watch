@@ -151,7 +151,15 @@ public class FilmService {
             log.error(message);
             throw new NotFoundException(message);
         }
-        final List<Film> films = filmStorage.findFilmsByDirector(directorId, sortBy);
+        DirectorSortOrderType directorSortOrderType;
+        if (sortBy.equals("year")) {
+            directorSortOrderType = DirectorSortOrderType.YEAR;
+        } else if (sortBy.equals("likes")) {
+            directorSortOrderType = DirectorSortOrderType.LIKES;
+        } else {
+            throw new ValidationException("Некорректный параметр сортировки");
+        }
+        final List<Film> films = filmStorage.findFilmsByDirector(directorId, directorSortOrderType);
         loadAdditionalFilmData(films);
         return films;
     }
