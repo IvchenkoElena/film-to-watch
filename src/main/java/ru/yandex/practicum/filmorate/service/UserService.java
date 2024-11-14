@@ -122,7 +122,6 @@ public class UserService {
         List<Film> recommendedFilms = filmStorage.getRecommendedFilms(userId);
         genreStorage.loadGenres(recommendedFilms);
         directorStorage.loadDirectors(recommendedFilms);
-        filmStorage.loadLikes(recommendedFilms);
 
         return recommendedFilms;
     }

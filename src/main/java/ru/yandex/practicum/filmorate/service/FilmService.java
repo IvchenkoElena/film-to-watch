@@ -199,6 +199,5 @@ public class FilmService {
     private void loadAdditionalFilmData(List<Film> films) {
         genreStorage.loadGenres(films);
         directorStorage.loadDirectors(films);
-        filmStorage.loadLikes(films);
     }
 }

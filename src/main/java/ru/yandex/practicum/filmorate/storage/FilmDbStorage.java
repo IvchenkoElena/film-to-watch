@@ -4,9 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
-import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
-import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.stereotype.Repository;
 import org.springframework.web.bind.annotation.RequestBody;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
@@ -19,9 +17,7 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 
 @Repository("filmDbStorage")
@@ -86,10 +82,6 @@ public class FilmDbStorage extends BaseRepository<Film> implements FilmStorage {
         Set<Director> directors = newFilm.getDirectors();
         if (directors != null) {
             saveDirectors(newFilm);
-        }
-        Set<Integer> likes = newFilm.getLikes();
-        if (likes != null) {
-            saveLikes(newFilm);
         }
         return newFilm;
     }
@@ -195,23 +187,6 @@ public class FilmDbStorage extends BaseRepository<Film> implements FilmStorage {
         });
     }
 
-    private void saveLikes(Film film) {
-        Set<Integer> likes = film.getLikes();
-        jdbc.batchUpdate(INSERT_LIKE_QUERY, new BatchPreparedStatementSetter() {
-            @Override
-            public void setValues(PreparedStatement ps, int i) throws SQLException {
-                Integer userId = likes.stream().toList().get(i);
-                ps.setInt(1, film.getId());
-                ps.setInt(2, userId);
-            }
-
-            @Override
-            public int getBatchSize() {
-                return likes.size();
-            }
-        });
-    }
-
     @Override
     public List<Film> getCommonFilms(Integer userId, Integer friendId) {
         String query = """
@@ -286,17 +261,5 @@ public class FilmDbStorage extends BaseRepository<Film> implements FilmStorage {
         }
         update(UPDATE_LIKES_COUNT_QUERY, likesCount, filmId);
         return likesCount;
-    }
-
-    @Override
-    public void loadLikes(List<Film> films) {
-        final Map<Integer, Film> filmById = films.stream().collect(Collectors.toMap(Film::getId, film -> film));
-        List<Integer> filmIds = films.stream().map(Film::getId).toList();
-        SqlParameterSource parameters = new MapSqlParameterSource("filmIds", filmIds);
-
-        namedJdbcTemplate.query(FIND_FILM_LIKES_QUERY + "(:filmIds)", parameters, (rs) -> {
-            final Film film = filmById.get(rs.getInt("FILM_ID"));
-            film.addLike(rs.getInt("USER_ID"));
-        });
     }
 }
