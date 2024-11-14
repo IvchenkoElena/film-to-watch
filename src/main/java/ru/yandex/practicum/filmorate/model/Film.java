@@ -25,7 +25,6 @@ public class Film {
     @NotNull
     @Positive
     private Integer duration;
-    private Set<Integer> likes = new HashSet<>();
     private Integer likesCount = 0;
     @NotNull
     private Mpa mpa;
@@ -39,9 +38,5 @@ public class Film {
 
     public void addDirector(Director director) {
         getDirectors().add(director);
-    }
-
-    public void addLike(Integer userId) {
-        getLikes().add(userId);
     }
 }
