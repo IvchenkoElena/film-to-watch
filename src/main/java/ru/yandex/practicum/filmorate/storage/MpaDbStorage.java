@@ -1,7 +1,6 @@
 package ru.yandex.practicum.filmorate.storage;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Primary;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
@@ -12,7 +11,6 @@ import ru.yandex.practicum.filmorate.model.Mpa;
 import java.util.List;
 
 @Repository("mpaDbStorage")
-@Primary
 public class MpaDbStorage extends BaseRepository<Mpa> implements MpaStorage {
     private static final String FIND_ALL_QUERY = "SELECT * FROM RATING";
     private static final String FIND_BY_ID_QUERY = "SELECT * FROM RATING WHERE RATING_ID = ?";

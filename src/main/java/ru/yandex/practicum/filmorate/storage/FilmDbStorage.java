@@ -1,16 +1,17 @@
 package ru.yandex.practicum.filmorate.storage;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Primary;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
+import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.stereotype.Repository;
 import org.springframework.web.bind.annotation.RequestBody;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
-import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Director;
+import ru.yandex.practicum.filmorate.model.DirectorSortOrderType;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 
@@ -18,15 +19,16 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 
 @Repository("filmDbStorage")
-@Primary
 public class FilmDbStorage extends BaseRepository<Film> implements FilmStorage {
 
     private static final String UPDATE_FILM_QUERY = "UPDATE FILMS SET NAME = ?, DESCRIPTION = ?, RELEASE_DATE = ?, DURATION = ?, RATING_ID = ?" +
-                                                    "WHERE FILM_ID = ?";
+            "WHERE FILM_ID = ?";
     private static final String GET_LIKES_COUNT_QUERY = """
              SELECT SUM(user_id)
              FROM LIKES
@@ -45,7 +47,7 @@ public class FilmDbStorage extends BaseRepository<Film> implements FilmStorage {
     private static final String FIND_BY_ID_QUERY = FIND_ALL_QUERY + " WHERE f.FILM_ID = ?";
     private static final String FIND_DIRECTOR_FILMS_SORTED_BY_YEARS_QUERY = FIND_ALL_QUERY + " inner join film_director fd on f.film_id = fd.film_id where fd.director_id = ? ORDER BY extract(year from f.release_date)";
     private static final String FIND_DIRECTOR_FILMS_SORTED_BY_LIKES_QUERY = FIND_ALL_QUERY + " inner join film_director fd on f.film_id = fd.film_id where fd.director_id = ? ORDER BY f.likes_count DESC";
-
+    private static final String FIND_FILM_LIKES_QUERY = "SELECT * FROM likes WHERE film_id IN";
 
     // Инициализируем репозиторий
     @Autowired
@@ -150,15 +152,11 @@ public class FilmDbStorage extends BaseRepository<Film> implements FilmStorage {
     }
 
     @Override
-    public List<Film> findFilmsByDirector(Integer directorId, String sortBy) {
-        String sql;
-        if (sortBy.equals("year")) {
-            sql = FIND_DIRECTOR_FILMS_SORTED_BY_YEARS_QUERY;
-        } else if (sortBy.equals("likes")) {
-            sql = FIND_DIRECTOR_FILMS_SORTED_BY_LIKES_QUERY;
-        } else {
-            throw new ValidationException("Некорректный параметр сортировки");
-        }
+    public List<Film> findFilmsByDirector(Integer directorId, DirectorSortOrderType directorSortOrderType) {
+        String sql = switch (directorSortOrderType) {
+            case YEAR -> FIND_DIRECTOR_FILMS_SORTED_BY_YEARS_QUERY;
+            case LIKES -> FIND_DIRECTOR_FILMS_SORTED_BY_LIKES_QUERY;
+        };
         return findMany(sql, directorId);
     }
 
@@ -288,5 +286,17 @@ public class FilmDbStorage extends BaseRepository<Film> implements FilmStorage {
         }
         update(UPDATE_LIKES_COUNT_QUERY, likesCount, filmId);
         return likesCount;
+    }
+
+    @Override
+    public void loadLikes(List<Film> films) {
+        final Map<Integer, Film> filmById = films.stream().collect(Collectors.toMap(Film::getId, film -> film));
+        List<Integer> filmIds = films.stream().map(Film::getId).toList();
+        SqlParameterSource parameters = new MapSqlParameterSource("filmIds", filmIds);
+
+        namedJdbcTemplate.query(FIND_FILM_LIKES_QUERY + "(:filmIds)", parameters, (rs) -> {
+            final Film film = filmById.get(rs.getInt("FILM_ID"));
+            film.addLike(rs.getInt("USER_ID"));
+        });
     }
 }

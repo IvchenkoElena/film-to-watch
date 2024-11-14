@@ -17,13 +17,13 @@ public class UserService {
     private final UserStorage userStorage;
     private final EventStorage eventStorage;
     private final FilmStorage filmStorage;
-    private final GenreDbStorage genreStorage;
+    private final GenreStorage genreStorage;
     private final DirectorStorage directorStorage;
 
     public UserService(@Qualifier("userDbStorage") UserStorage userStorage,
                        @Qualifier("eventDbStorage") EventStorage eventStorage,
                        @Qualifier("filmDbStorage") FilmStorage filmStorage,
-                       @Qualifier("genreDbStorage")GenreDbStorage genreStorage,
+                       @Qualifier("genreDbStorage")GenreStorage genreStorage,
                        @Qualifier("directorDbStorage")DirectorStorage directorStorage) {
         this.userStorage = userStorage;
         this.eventStorage = eventStorage;
@@ -122,6 +122,7 @@ public class UserService {
         List<Film> recommendedFilms = filmStorage.getRecommendedFilms(userId);
         genreStorage.loadGenres(recommendedFilms);
         directorStorage.loadDirectors(recommendedFilms);
+        filmStorage.loadLikes(recommendedFilms);
 
         return recommendedFilms;
     }
