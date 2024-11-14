@@ -2,9 +2,9 @@ package ru.yandex.practicum.filmorate.storage;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Primary;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
 import org.springframework.web.bind.annotation.RequestBody;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
@@ -15,13 +15,13 @@ import java.util.Set;
 
 @Slf4j
 @Repository("userDbStorage")
-@Primary
 public class UserDbStorage extends BaseRepository<User> implements UserStorage {
     private static final String FIND_ALL_QUERY = "SELECT * FROM USERS";
     private static final String FIND_BY_ID_QUERY = "SELECT * FROM USERS WHERE USER_ID = ?";
     private static final String UPDATE_QUERY = "UPDATE USERS SET EMAIL = ?, LOGIN = ?, NAME = ?, BIRTHDAY = ?" +
             "WHERE USER_ID = ?";
     private static final String INSERT_QUERY = "INSERT INTO USERS(EMAIL, LOGIN, NAME, BIRTHDAY) VALUES(?, ?, ?, ?)";
+    private static final String DELETE_USER_QUERY = "DELETE FROM users WHERE user_id = ?";
     private static final String INSERT_FRIEND_QUERY = "INSERT INTO friendship(user_id, friend_id) VALUES(?, ?)";
     private static final String DELETE_FRIEND_QUERY = "DELETE FROM friendship WHERE user_id = ? AND friend_id = ?";
     private static final String FIND_FRIEND_QUERY = "SELECT u.* FROM users u JOIN friendship f ON f.friend_id = u.user_id WHERE f.user_id = ?";
@@ -29,8 +29,8 @@ public class UserDbStorage extends BaseRepository<User> implements UserStorage {
 
     // Инициализируем репозиторий
     @Autowired
-    public UserDbStorage(JdbcTemplate jdbc, RowMapper<User> mapper) {
-        super(jdbc, mapper);
+    public UserDbStorage(JdbcTemplate jdbc, NamedParameterJdbcTemplate namedJdbcTemplate, RowMapper<User> mapper) {
+        super(jdbc, namedJdbcTemplate, mapper);
     }
 
     @Override
@@ -74,6 +74,14 @@ public class UserDbStorage extends BaseRepository<User> implements UserStorage {
         );
         newUser.setId(id);
         return newUser;
+    }
+
+    @Override
+    public void removeUser(Integer userId) {
+        boolean queryResult = delete(DELETE_USER_QUERY, userId);
+        if (!queryResult) {
+            throw new NotFoundException(String.format("Пользователь с ID %d не найден", userId));
+        }
     }
 
     //Вынесла методы дружбы из сервиса в Storage

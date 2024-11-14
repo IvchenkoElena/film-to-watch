@@ -1,6 +1,6 @@
 package ru.yandex.practicum.filmorate.model;
 
-import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 
@@ -8,7 +8,7 @@ import lombok.RequiredArgsConstructor;
 @Data
 public class Mpa {
     private Integer id;
-    @NotNull(message = "Название рейтинга не должно быть пустым")
+    @NotBlank(message = "Название рейтинга не должно быть пустым")
     private String name;
     private String description;
 

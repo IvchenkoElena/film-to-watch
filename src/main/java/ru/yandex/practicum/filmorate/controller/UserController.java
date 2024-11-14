@@ -1,8 +1,11 @@
 package ru.yandex.practicum.filmorate.controller;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
+import ru.yandex.practicum.filmorate.model.Event;
+import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.UserService;
 
@@ -28,6 +31,12 @@ public class UserController {
         return userService.findById(userId);
     }
 
+    @DeleteMapping("/{userId}")
+    public void removeUserById(@PathVariable Integer userId) {
+        userService.removeUser(userId);
+        log.info("Удаление пользователя с ID {}", userId);
+    }
+
     @GetMapping("/{id}/friends")
     public List<User> findFriends(@PathVariable Integer id) {
         log.info("Получение списка друзей пользователя с ID {}", id);
@@ -42,13 +51,13 @@ public class UserController {
     }
 
     @PostMapping
-    public User create(@RequestBody User newUser) {
+    public User create(@Valid @RequestBody User newUser) {
         log.info("Создание нового пользователя: {}", newUser.toString());
         return userService.createUser(newUser);
     }
 
     @PutMapping
-    public User update(@RequestBody User newUser) {
+    public User update(@Valid @RequestBody User newUser) {
         log.info("Обновление пользователя с ID {}", newUser.getId());
         return userService.updateUser(newUser);
     }
@@ -65,5 +74,19 @@ public class UserController {
                                   @PathVariable Integer friendId) {
         userService.removeFromFriends(id, friendId);
         log.info("Пользователи с ID {} и {} удалены из друзей", id, friendId);
+    }
+
+    @GetMapping("/{id}/feed")
+    public List<Event> getEvents(@PathVariable Integer id) {
+        return userService.getEvents(id);
+    }
+
+    @GetMapping("/{id}/recommendations")
+    public List<Film> getRecommendedFilms(@PathVariable Integer id) {
+        log.info("Получение списка рекомендованных фильмов для пользователя с ID {}...", id);
+        List<Film> recommendedFilms = userService.getRecommendedFilms(id);
+        log.info("Список рекомендованных фильмов получен: {}.", recommendedFilms);
+
+        return recommendedFilms;
     }
 }

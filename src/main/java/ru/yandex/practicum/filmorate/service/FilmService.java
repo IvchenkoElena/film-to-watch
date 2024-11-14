@@ -5,17 +5,14 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
-import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.model.Genre;
-import ru.yandex.practicum.filmorate.model.Mpa;
-import ru.yandex.practicum.filmorate.storage.FilmStorage;
-import ru.yandex.practicum.filmorate.storage.GenreStorage;
-import ru.yandex.practicum.filmorate.storage.MpaStorage;
-import ru.yandex.practicum.filmorate.storage.UserStorage;
+import ru.yandex.practicum.filmorate.model.*;
+import ru.yandex.practicum.filmorate.storage.*;
 
 import java.time.LocalDate;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 @Slf4j
 @Service
@@ -24,28 +21,32 @@ public class FilmService {
     private final UserStorage userStorage;
     private final GenreStorage genreStorage;
     private final MpaStorage mpaStorage;
+    private final DirectorStorage directorStorage;
+    private final EventStorage eventStorage;
 
     public FilmService(@Qualifier("filmDbStorage") FilmStorage filmStorage,
                        @Qualifier("userDbStorage") UserStorage userStorage,
                        @Qualifier("genreDbStorage") GenreStorage genreStorage,
-                       @Qualifier("mpaDbStorage") MpaStorage mpaStorage) {
+                       @Qualifier("mpaDbStorage") MpaStorage mpaStorage,
+                       @Qualifier("directorDbStorage") DirectorStorage directorStorage,
+                       @Qualifier("eventDbStorage") EventStorage eventStorage) {
         this.filmStorage = filmStorage;
         this.userStorage = userStorage;
         this.genreStorage = genreStorage;
         this.mpaStorage = mpaStorage;
+        this.directorStorage = directorStorage;
+        this.eventStorage = eventStorage;
     }
 
     public List<Film> findAllFilms() {
         final List<Film> films = filmStorage.findAll();
-        genreStorage.load(films); //тут использовала новый метод загрузки жанров
+        loadAdditionalFilmData(films);
         return films;
     }
 
     public Film findById(Integer filmId) {
         Film film = filmStorage.getById(filmId);
-        //film.setGenres(genreStorage.getGenresByFilmId(filmId)); // здесь оставила через отдельный запрос
-        //или надо тут тоже как-то применить метод загрузки жанров, но только для одного фильма?
-        genreStorage.load(List.of(film));
+        loadAdditionalFilmData(List.of(film));
         return film;
     }
 
@@ -59,6 +60,10 @@ public class FilmService {
     public Film updateFilm(Film newFilm) {
         filmValidation(newFilm);
         return filmStorage.update(newFilm);
+    }
+
+    public void removeFilm(Integer filmId) {
+        filmStorage.removeFilm(filmId);
     }
 
     //методы валидации
@@ -94,30 +99,15 @@ public class FilmService {
             log.error(message);
             throw new ValidationException(message);
         }
-    }
-
-    public void addLike(Integer filmId, Integer userId) {
-        // ищем пользователй с такими ID
-        if (filmStorage.getById(filmId) == null) {
-            String message = "Фильм с id = " + filmId + " не найден";
-            log.error(message);
-            throw new NotFoundException(message);
-        }
-        if (userStorage.getById(userId) == null) {
-            String message = "Пользователь с id = " + userId + " не найден";
-            log.error(message);
-            throw new NotFoundException(message);
-        }
-        if (filmStorage.getById(filmId).getLikes().contains(userId)) {
-            String message = "Пользователь уже оценил этот фильм ранее";
+        if (newFilm.getDirectors() != null && !new HashSet<>(directorStorage.findAllDirectors().stream().map(Director::getId).toList()).containsAll(newFilm.getDirectors().stream().map(Director::getId).toList())) {
+            String message = "Режиссер должен быть существующим";
             log.error(message);
             throw new ValidationException(message);
         }
-        filmStorage.addLike(filmId, userId);
     }
 
-    public void removeLike(Integer filmId, Integer userId) {
-        // ищем пользователй с такими ID
+    public void addLike(Integer filmId, Integer userId) {
+        // ищем фильм и пользователя с такими ID
         if (filmStorage.getById(filmId) == null) {
             String message = "Фильм с id = " + filmId + " не найден";
             log.error(message);
@@ -128,12 +118,86 @@ public class FilmService {
             log.error(message);
             throw new NotFoundException(message);
         }
-        filmStorage.removeLike(filmId, userId);
+        filmStorage.addLike(filmId, userId);
+        eventStorage.addEvent(new Event(userId, EventType.LIKE, EventOperation.ADD, filmId));
     }
 
-    public List<Film> bestFilms(int count) {
-        final List<Film> films = filmStorage.bestFilms(count);
-        genreStorage.load(films);//новый метод загрузки жанров
+    public void removeLike(Integer filmId, Integer userId) {
+        // ищем фильм и пользователя с такими ID
+        if (filmStorage.getById(filmId) == null) {
+            String message = "Фильм с id = " + filmId + " не найден";
+            log.error(message);
+            throw new NotFoundException(message);
+        }
+        if (userStorage.getById(userId) == null) {
+            String message = "Пользователь с id = " + userId + " не найден";
+            log.error(message);
+            throw new NotFoundException(message);
+        }
+        Integer likesCount = filmStorage.getById(filmId).getLikesCount() - 1;
+        filmStorage.removeLike(filmId, userId);
+        eventStorage.addEvent(new Event(userId, EventType.LIKE, EventOperation.REMOVE, filmId));
+    }
+
+    public List<Film> bestFilms(int count, Integer genreId, Integer year) {
+        final List<Film> films = filmStorage.bestFilms(count, genreId, year);
+        loadAdditionalFilmData(films);
         return films;
+    }
+
+    public List<Film> findFilmsByDirector(Integer directorId, String sortBy) {
+        if (directorStorage.findDirectorById(directorId) == null) {
+            String message = "Режиссер с id = " + directorId + " не найден";
+            log.error(message);
+            throw new NotFoundException(message);
+        }
+        DirectorSortOrderType directorSortOrderType;
+        if (sortBy.equals("year")) {
+            directorSortOrderType = DirectorSortOrderType.YEAR;
+        } else if (sortBy.equals("likes")) {
+            directorSortOrderType = DirectorSortOrderType.LIKES;
+        } else {
+            throw new ValidationException("Некорректный параметр сортировки");
+        }
+        final List<Film> films = filmStorage.findFilmsByDirector(directorId, directorSortOrderType);
+        loadAdditionalFilmData(films);
+        return films;
+    }
+
+    public List<Film> getCommonFilms(Integer userId, Integer friendId) {
+        final List<Film> films = filmStorage.getCommonFilms(userId, friendId);
+        loadAdditionalFilmData(films);
+        return films;
+    }
+
+    public List<Film> searchFilms(String searchQuery, List<String> searchBy) {
+        List<Film> foundFilms = searchFilmsByCriteria(searchQuery, searchBy);
+
+        if (!foundFilms.isEmpty()) {
+            loadAdditionalFilmData(foundFilms);
+        }
+
+        return foundFilms;
+    }
+
+    private List<Film> searchFilmsByCriteria(String searchQuery, List<String> searchBy) {
+        Map<String, String> controlCriteria = new LinkedHashMap<>();
+        controlCriteria.put("title", null);
+        controlCriteria.put("director", null);
+
+        searchBy.forEach(inputCriteria -> {
+            if (!controlCriteria.containsKey(inputCriteria)) {
+                throw new ValidationException("Задан неверный критерий поиска '%s'".formatted(inputCriteria));
+            }
+
+            controlCriteria.put(inputCriteria, searchQuery);
+        });
+
+        return filmStorage.searchFilms(controlCriteria.values().toArray(new String[0]));
+    }
+
+    private void loadAdditionalFilmData(List<Film> films) {
+        genreStorage.loadGenres(films);
+        directorStorage.loadDirectors(films);
     }
 }

@@ -14,6 +14,8 @@ public interface UserStorage {
 
     User update(@RequestBody User newUser);
 
+    void removeUser(Integer userId);
+
     //Вынесла методы дружбы из сервиса в Storage
 
     void addToFriends(Integer userId, Integer friendId);

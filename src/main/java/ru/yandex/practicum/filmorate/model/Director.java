@@ -4,8 +4,8 @@ import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 
 @Data
-public class Genre {
+public class Director {
     private Integer id;
-    @NotBlank(message = "Название жанра не должно быть пустым")
+    @NotBlank
     private String name;
 }
