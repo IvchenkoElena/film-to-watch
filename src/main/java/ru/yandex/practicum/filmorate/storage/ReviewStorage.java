@@ -14,14 +14,9 @@ public interface ReviewStorage {
 
     Review getById(Integer id);
 
-    //Получение всех отзывов по идентификатору фильма, если фильм не указан то все. Если кол-во не указано, то 10.
     List<Review> getByParams(Integer filmId, Integer count);
 
-    void addLike(Integer reviewId, Integer userId); //Пользователь ставит лайк отзыву.
+    void setLikeOrDislike(Integer reviewId, Integer userId, Boolean isLike); //Пользователь ставит лайк отзыву.
 
-    void addDislike(Integer reviewId, Integer userId); //Пользователь ставит дизлайк отзыву.
-
-    void deleteLike(Integer reviewId, Integer userId); //Пользователь удаляет лайк отзыву.
-
-    void deleteDislike(Integer reviewId, Integer userId); //Пользователь удаляет дизлайк отзыву.
+    void deleteLikeOrDislike(Integer reviewId, Integer userId); //Пользователь удаляет лайк отзыву.
 }

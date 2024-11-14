@@ -1,5 +1,6 @@
 package ru.yandex.practicum.filmorate.controller;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
@@ -16,13 +17,13 @@ public class ReviewController {
     private final ReviewService reviewService;
 
     @PostMapping
-    public Review addNew(@RequestBody Review newReview) {
-        log.info("Поступил запрос на добавление нового отзыва: {}", newReview.toString());
+    public Review addNew(@RequestBody @Valid Review newReview) {
+        log.info("Поступил запрос на добавление нового отзыва: {}", newReview);
         return reviewService.addNew(newReview);
     }
 
     @PutMapping
-    public Review update(@RequestBody Review modifiedReview) {
+    public Review update(@RequestBody @Valid Review modifiedReview) {
         log.info("Поступил запрос на обновление отзыва: {}", modifiedReview.toString());
         return reviewService.update(modifiedReview);
     }
@@ -49,24 +50,26 @@ public class ReviewController {
     @PutMapping("{reviewId}/like/{userId}")
     public void addLike(@PathVariable Integer reviewId, @PathVariable Integer userId) {
         log.info("Поступил запрос на добавление лайка отзыву с id: {} от пользователя с id: {}", reviewId, userId);
-        reviewService.addLike(reviewId, userId);
+        Boolean isLike = true; //лайк
+        reviewService.setLikeOrDislike(reviewId, userId, isLike);
     }
 
     @PutMapping("{reviewId}/dislike/{userId}")
     public void addDislike(@PathVariable Integer reviewId, @PathVariable Integer userId) {
         log.info("Поступил запрос на добавление дизлайка отзыву с id: {} от пользователя с id: {}", reviewId, userId);
-        reviewService.addDislike(reviewId, userId);
+        Boolean isLike = false; //дизлайк
+        reviewService.setLikeOrDislike(reviewId, userId, isLike);
     }
 
     @DeleteMapping("{reviewId}/like/{userId}")
     public void deleteLike(@PathVariable Integer reviewId, @PathVariable Integer userId) {
         log.info("Поступил запрос на удаления лайка отзыву с id: {} от пользователя с id: {}", reviewId, userId);
-        reviewService.deleteLike(reviewId, userId);
+        reviewService.deleteLikeOrDislike(reviewId, userId);
     }
 
     @DeleteMapping("{reviewId}/dislike/{userId}")
     public void deleteDislike(@PathVariable Integer reviewId, @PathVariable Integer userId) {
         log.info("Поступил запрос на удаление дизлайка отзыву с id: {} от пользователя с id: {}", reviewId, userId);
-        reviewService.deleteDislike(reviewId, userId);
+        reviewService.deleteLikeOrDislike(reviewId, userId);
     }
 }

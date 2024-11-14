@@ -60,6 +60,7 @@ public class ReviewDbStorage extends BaseRepository<Review> implements ReviewSto
         return findOne(query, id).orElseThrow(() -> new NotFoundException(String.format("Отзыв c id %d не найден", id)));
     }
 
+    //Получение всех отзывов по идентификатору фильма, если фильм не указан то все. Если кол-во не указано, то 10.
     @Override
     public List<Review> getByParams(Integer filmId, Integer count) {
         String query;
@@ -73,38 +74,18 @@ public class ReviewDbStorage extends BaseRepository<Review> implements ReviewSto
     }
 
     @Override
-    public void addLike(Integer reviewId, Integer userId) {
-        Boolean isLike = true;
+    public void setLikeOrDislike(Integer reviewId, Integer userId, Boolean isLike) {
         String query = "MERGE INTO REVIEW_LIKES_DISLIKES(review_id, user_id, is_like) KEY(REVIEW_ID,USER_ID) VALUES(?, ?, ?)";
         update(query, reviewId, userId, isLike);
         updateUsefulRateByReviewId(reviewId);
     }
 
     @Override
-    public void addDislike(Integer reviewId, Integer userId) {
-        Boolean isLike = false;
-        String query = "MERGE INTO REVIEW_LIKES_DISLIKES(review_id, user_id, is_like) KEY(REVIEW_ID,USER_ID) VALUES(?, ?, ?)";
-        update(query, reviewId, userId, isLike);
-        updateUsefulRateByReviewId(reviewId);
-    }
-
-    @Override
-    public void deleteLike(Integer reviewId, Integer userId) {
+    public void deleteLikeOrDislike(Integer reviewId, Integer userId) {
         String query = """
-                UPDATE REVIEW_LIKES_DISLIKES
-                SET IS_LIKE = NULL
-                WHERE REVIEW_ID = ? AND USER_ID = ? AND IS_LIKE = TRUE
-                """;
-        update(query, reviewId, userId);
-        updateUsefulRateByReviewId(reviewId);
-    }
-
-    @Override
-    public void deleteDislike(Integer reviewId, Integer userId) {
-        String query = """
-                UPDATE REVIEW_LIKES_DISLIKES
-                SET IS_LIKE = NULL
-                WHERE REVIEW_ID = ? AND USER_ID = ? AND IS_LIKE = FALSE
+                DELETE
+                FROM REVIEW_LIKES_DISLIKES
+                WHERE REVIEW_ID = ? AND USER_ID = ?
                 """;
         update(query, reviewId, userId);
         updateUsefulRateByReviewId(reviewId);

@@ -3,8 +3,6 @@ package ru.yandex.practicum.filmorate.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.filmorate.exception.NotFoundException;
-import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Event;
 import ru.yandex.practicum.filmorate.model.EventOperation;
 import ru.yandex.practicum.filmorate.model.EventType;
@@ -52,61 +50,29 @@ public class ReviewService {
         return reviewStorage.getByParams(filmId, count);
     }
 
-    public void addLike(Integer reviewId, Integer userId) {
+    public void setLikeOrDislike(Integer reviewId, Integer userId, Boolean isLike) {
         checkUserExistById(userId);
-        reviewStorage.addLike(reviewId, userId);
+        reviewStorage.setLikeOrDislike(reviewId, userId, isLike);
     }
 
-    public void addDislike(Integer reviewId, Integer userId) {
+    public void deleteLikeOrDislike(Integer reviewId, Integer userId) {
         checkUserExistById(userId);
-        reviewStorage.addDislike(reviewId, userId);
-    }
-
-    public void deleteLike(Integer reviewId, Integer userId) {
-        checkUserExistById(userId);
-        reviewStorage.deleteLike(reviewId, userId);
-    }
-
-    public void deleteDislike(Integer reviewId, Integer userId) {
-        checkUserExistById(userId);
-        reviewStorage.deleteDislike(reviewId, userId);
+        reviewStorage.deleteLikeOrDislike(reviewId, userId);
     }
 
     void checkUserExistById(Integer userId) {
-        if (userId <= 0) {
-            throw new NotFoundException(String.format("Пользователь c ID %d не найден", userId));
-        }
         userStorage.getById(userId);
     }
 
     void checkFilmExistById(Integer filmId) {
-        if (filmId <= 0) {
-            throw new NotFoundException(String.format("Фильм c ID %d не найден", filmId));
-        }
         filmStorage.getById(filmId);
     }
 
     void checkCorrectReviewParams(Review review) {
         Integer userId = review.getUserId();
-        if (userId <= 0) {
-            throw new NotFoundException(String.format("Пользователь c ID %d не найден", userId));
-        }
         userStorage.getById(userId);
 
         Integer filmId = review.getFilmId();
-        if (filmId <= 0) {
-            throw new NotFoundException(String.format("Фильм c ID %d не найден", filmId));
-        }
         filmStorage.getById(filmId);
-
-        String content = review.getContent();
-        if (content == null || content.isBlank()) {
-            throw new ValidationException("Невозможно добавить пустой отзыв");
-        }
-
-        Boolean isPositive = review.getIsPositive();
-        if (isPositive == null) {
-            throw new ValidationException("Невозможно добавить отзыв без указания типа отзыва");
-        }
     }
 }
