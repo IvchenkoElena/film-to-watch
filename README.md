@@ -1,5 +1,7 @@
 # [![Typing SVG](https://readme-typing-svg.demolab.com?font=Fira+Code&weight=600&size=40&pause=10000&color=36A2F7&width=435&height=56&lines=FILM-TO-WATCH)](https://git.io/typing-svg)
-Template repository for FilmToWatch project.
+Социальная сеть для выбора кино на основе того, какие оценки вы и ваши друзья ставите просмотренным фильмам.
+Проект выполнялся группой разработчиков. В командном проекте я выступала в качестве тимлида, отвечала за распределение задач и соблюдение сроков выполнения проекта.
+Реализован рекомендательный движок, в котором используется коллаборативная фильтрация по элементам, а также поиск по названию фильмов и по режиссеру.
 
 ## Схема базы данных 
 ![Схема базы данных](https://github.com/IvchenkoElena/java-filmorate/blob/main/src/main/resources/Filmorate%20(3).png)
