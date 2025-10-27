@@ -1,5 +1,5 @@
-# [![Typing SVG](https://readme-typing-svg.demolab.com?font=Fira+Code&weight=600&size=40&pause=10000&color=36A2F7&width=435&height=56&lines=FILMORATE)](https://git.io/typing-svg)
-Template repository for Filmorate project.
+# [![Typing SVG](https://readme-typing-svg.demolab.com?font=Fira+Code&weight=600&size=40&pause=10000&color=36A2F7&width=435&height=56&lines=FILM-TO-WATCH)](https://git.io/typing-svg)
+Template repository for FilmToWatch project.
 
 ## Схема базы данных 
 ![Схема базы данных](https://github.com/IvchenkoElena/java-filmorate/blob/main/src/main/resources/Filmorate%20(3).png)
